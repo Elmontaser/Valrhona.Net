@@ -1,0 +1,48 @@
+@Valrhona.API_HostAddress = http://localhost:5103/api
+
+GET {{Valrhona.API_HostAddress}}/items
+Accept: application/json
+
+###
+GET {{Valrhona.API_HostAddress}}/items/10
+Accept: application/json
+
+###
+POST {{Valrhona.API_HostAddress}}/items/
+Accept: application/json
+Content-Type:application/json
+
+{ 
+    "itemCode": "RM-TEST-002", 
+    "itemName": "مادة 1 اختبار", 
+    "itemTypeId": 1, 
+    "categoryId": 1, 
+    "unitId": 1, 
+    "notes": "إضافة من API" 
+}
+
+
+### Update Item
+PUT {{Valrhona.API_HostAddress}}/items/1
+Content-Type: application/json
+
+{
+  "itemCode": "RM-FL-001",
+  "itemName": "دقيق محدث",
+  "itemTypeId": 1,
+  "categoryId": 1,
+  "unitId": 1,
+  "notes": "تم التعديل من API"
+}
+
+### Delete Item
+DELETE {{Valrhona.API_HostAddress}}/items/11
+
+###ٍSearch Item
+GET {{Valrhona.API_HostAddress}}/items/search?CategoryId=1
+
+
+###Categories
+
+###GetAll
+GET {{Valrhona.API_HostAddress}}/categories

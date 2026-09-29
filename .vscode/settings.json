@@ -1,0 +1,7 @@
+{
+    "dotnet.defaultSolution": "Valrhona.slnx",
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp",
+        "editor.formatOnSave": true
+    }
+}
