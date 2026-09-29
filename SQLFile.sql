@@ -1,90 +1,6 @@
-USE [master]
+USE [ValrhonaDB]
 GO
-/****** Object:  Database [ValrhonaDb]    Script Date: 29/09/2026 07:48:01 ص ******/
-CREATE DATABASE [ValrhonaDb]
- CONTAINMENT = NONE
- ON  PRIMARY 
-( NAME = N'ValrhonaDb', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL17.MSSQLSERVER\MSSQL\DATA\ValrhonaDb.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
- LOG ON 
-( NAME = N'ValrhonaDb_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL17.MSSQLSERVER\MSSQL\DATA\ValrhonaDb_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
- WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
-GO
-ALTER DATABASE [ValrhonaDb] SET COMPATIBILITY_LEVEL = 170
-GO
-IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
-begin
-EXEC [ValrhonaDb].[dbo].[sp_fulltext_database] @action = 'enable'
-end
-GO
-ALTER DATABASE [ValrhonaDb] SET ANSI_NULL_DEFAULT OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET ANSI_NULLS OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET ANSI_PADDING OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET ANSI_WARNINGS OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET ARITHABORT OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET AUTO_CLOSE OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET AUTO_SHRINK OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET AUTO_UPDATE_STATISTICS ON 
-GO
-ALTER DATABASE [ValrhonaDb] SET CURSOR_CLOSE_ON_COMMIT OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET CURSOR_DEFAULT  GLOBAL 
-GO
-ALTER DATABASE [ValrhonaDb] SET CONCAT_NULL_YIELDS_NULL OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET NUMERIC_ROUNDABORT OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET QUOTED_IDENTIFIER OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET RECURSIVE_TRIGGERS OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET  DISABLE_BROKER 
-GO
-ALTER DATABASE [ValrhonaDb] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET DATE_CORRELATION_OPTIMIZATION OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET TRUSTWORTHY OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET ALLOW_SNAPSHOT_ISOLATION OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET PARAMETERIZATION SIMPLE 
-GO
-ALTER DATABASE [ValrhonaDb] SET READ_COMMITTED_SNAPSHOT OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET HONOR_BROKER_PRIORITY OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET RECOVERY SIMPLE 
-GO
-ALTER DATABASE [ValrhonaDb] SET  MULTI_USER 
-GO
-ALTER DATABASE [ValrhonaDb] SET PAGE_VERIFY CHECKSUM  
-GO
-ALTER DATABASE [ValrhonaDb] SET DB_CHAINING OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
-GO
-ALTER DATABASE [ValrhonaDb] SET TARGET_RECOVERY_TIME = 60 SECONDS 
-GO
-ALTER DATABASE [ValrhonaDb] SET DELAYED_DURABILITY = DISABLED 
-GO
-ALTER DATABASE [ValrhonaDb] SET OPTIMIZED_LOCKING = OFF 
-GO
-ALTER DATABASE [ValrhonaDb] SET ACCELERATED_DATABASE_RECOVERY = OFF  
-GO
-ALTER DATABASE [ValrhonaDb] SET QUERY_STORE = ON
-GO
-ALTER DATABASE [ValrhonaDb] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POLICY = (STALE_QUERY_THRESHOLD_DAYS = 30), DATA_FLUSH_INTERVAL_SECONDS = 900, INTERVAL_LENGTH_MINUTES = 60, MAX_STORAGE_SIZE_MB = 1000, QUERY_CAPTURE_MODE = AUTO, SIZE_BASED_CLEANUP_MODE = AUTO, MAX_PLANS_PER_QUERY = 200, WAIT_STATS_CAPTURE_MODE = ON)
-GO
-USE [ValrhonaDb]
-GO
-/****** Object:  UserDefinedTableType [dbo].[RecipeIngredientType]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  UserDefinedTableType [dbo].[RecipeIngredientType]    Script Date: 29/09/2026 03:45:20 م ******/
 CREATE TYPE [dbo].[RecipeIngredientType] AS TABLE(
 	[IngredientItemId] [int] NOT NULL,
 	[Quantity] [decimal](18, 4) NOT NULL,
@@ -94,421 +10,14 @@ CREATE TYPE [dbo].[RecipeIngredientType] AS TABLE(
 	[Notes] [nvarchar](500) NULL
 )
 GO
-/****** Object:  Table [dbo].[Categories]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Categories](
-	[CategoryId] [int] IDENTITY(1,1) NOT NULL,
-	[CategoryName] [nvarchar](100) NOT NULL,
-	[ParentCategoryId] [int] NULL,
-	[IsActive] [bit] NOT NULL,
-	[CreatedAt] [datetime2](0) NOT NULL,
- CONSTRAINT [PK_Categories] PRIMARY KEY CLUSTERED 
-(
-	[CategoryId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[ItemCosts]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ItemCosts](
-	[ItemCostId] [int] IDENTITY(1,1) NOT NULL,
-	[ItemId] [int] NOT NULL,
-	[CostPerUnit] [decimal](18, 4) NOT NULL,
-	[UnitId] [int] NOT NULL,
-	[Currency] [nvarchar](10) NOT NULL,
-	[CostDate] [date] NOT NULL,
-	[SourceRecipeId] [int] NULL,
-	[Notes] [nvarchar](500) NULL,
-	[CreatedAt] [datetime2](7) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ItemCostId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[ItemPrices]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ItemPrices](
-	[ItemPriceId] [int] IDENTITY(1,1) NOT NULL,
-	[ItemId] [int] NOT NULL,
-	[Price] [decimal](18, 4) NOT NULL,
-	[Currency] [nvarchar](10) NOT NULL,
-	[EffectiveDate] [date] NOT NULL,
-	[IsActive] [bit] NOT NULL,
-	[Notes] [nvarchar](500) NULL,
-	[CreatedAt] [datetime2](7) NOT NULL,
-	[UnitId] [int] NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[ItemPriceId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Items]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Items](
-	[ItemId] [int] IDENTITY(1,1) NOT NULL,
-	[ItemCode] [nvarchar](50) NOT NULL,
-	[ItemName] [nvarchar](200) NOT NULL,
-	[ItemTypeId] [tinyint] NOT NULL,
-	[CategoryId] [int] NOT NULL,
-	[UnitId] [int] NOT NULL,
-	[IsActive] [bit] NOT NULL,
-	[Notes] [nvarchar](500) NULL,
-	[CreatedAt] [datetime2](0) NOT NULL,
-	[UpdatedAt] [datetime2](0) NULL,
- CONSTRAINT [PK_Items] PRIMARY KEY CLUSTERED 
-(
-	[ItemId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_Items_ItemCode] UNIQUE NONCLUSTERED 
-(
-	[ItemCode] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[ItemTypes]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ItemTypes](
-	[ItemTypeId] [tinyint] IDENTITY(1,1) NOT NULL,
-	[TypeName] [nvarchar](50) NOT NULL,
-	[IsActive] [bit] NOT NULL,
- CONSTRAINT [PK_ItemTypes] PRIMARY KEY CLUSTERED 
-(
-	[ItemTypeId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_ItemTypes_NameAr] UNIQUE NONCLUSTERED 
-(
-	[TypeName] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[RecipeDetails]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[RecipeDetails](
-	[RecipeDetailId] [bigint] IDENTITY(1,1) NOT NULL,
-	[RecipeId] [int] NOT NULL,
-	[IngredientItemId] [int] NOT NULL,
-	[Quantity] [decimal](18, 4) NOT NULL,
-	[UnitId] [int] NOT NULL,
-	[SequenceNo] [int] NOT NULL,
-	[WastePercent] [decimal](5, 2) NOT NULL,
-	[Notes] [nvarchar](500) NULL,
- CONSTRAINT [PK_RecipeDetails] PRIMARY KEY CLUSTERED 
-(
-	[RecipeDetailId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Recipes]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Recipes](
-	[RecipeId] [int] IDENTITY(1,1) NOT NULL,
-	[RecipeCode] [nvarchar](50) NOT NULL,
-	[RecipeNameAr] [nvarchar](200) NOT NULL,
-	[RecipeNameEn] [nvarchar](200) NULL,
-	[OutputItemId] [int] NOT NULL,
-	[OutputQuantity] [decimal](18, 4) NOT NULL,
-	[OutputUnitId] [int] NOT NULL,
-	[VersionNo] [int] NOT NULL,
-	[IsActive] [bit] NOT NULL,
-	[Notes] [nvarchar](1000) NULL,
-	[CreatedAt] [datetime2](0) NOT NULL,
-	[UpdatedAt] [datetime2](0) NULL,
-	[ActualOutputQuantity] [decimal](18, 4) NULL,
-	[BatchInputQuantity] [decimal](18, 4) NULL,
- CONSTRAINT [PK_Recipes] PRIMARY KEY CLUSTERED 
-(
-	[RecipeId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_Recipes_RecipeCode] UNIQUE NONCLUSTERED 
-(
-	[RecipeCode] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[UnitConversions]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[UnitConversions](
-	[UnitConversionId] [int] IDENTITY(1,1) NOT NULL,
-	[FromUnitId] [int] NOT NULL,
-	[ToUnitId] [int] NOT NULL,
-	[ConversionFactor] [decimal](18, 8) NOT NULL,
-	[IsActive] [bit] NOT NULL,
-	[Notes] [nvarchar](500) NULL,
-	[CreatedAt] [datetime2](7) NOT NULL,
-PRIMARY KEY CLUSTERED 
-(
-	[UnitConversionId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_UnitConversions] UNIQUE NONCLUSTERED 
-(
-	[FromUnitId] ASC,
-	[ToUnitId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Units]    Script Date: 29/09/2026 07:48:02 ص ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Units](
-	[UnitId] [int] IDENTITY(1,1) NOT NULL,
-	[UnitName] [nvarchar](50) NOT NULL,
-	[Symbol] [nvarchar](10) NULL,
-	[IsActive] [bit] NOT NULL,
- CONSTRAINT [PK_Units] PRIMARY KEY CLUSTERED 
-(
-	[UnitId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_Units_NameAr] UNIQUE NONCLUSTERED 
-(
-	[UnitName] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_Categories_ParentCategoryId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_Categories_ParentCategoryId] ON [dbo].[Categories]
-(
-	[ParentCategoryId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_Items_CategoryId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_Items_CategoryId] ON [dbo].[Items]
-(
-	[CategoryId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-SET ANSI_PADDING ON
-GO
-/****** Object:  Index [IX_Items_ItemNameAr]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_Items_ItemNameAr] ON [dbo].[Items]
-(
-	[ItemName] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_Items_ItemTypeId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_Items_ItemTypeId] ON [dbo].[Items]
-(
-	[ItemTypeId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_Items_UnitId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_Items_UnitId] ON [dbo].[Items]
-(
-	[UnitId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_RecipeDetails_IngredientItemId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_RecipeDetails_IngredientItemId] ON [dbo].[RecipeDetails]
-(
-	[IngredientItemId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_RecipeDetails_RecipeId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_RecipeDetails_RecipeId] ON [dbo].[RecipeDetails]
-(
-	[RecipeId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_RecipeDetails_UnitId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_RecipeDetails_UnitId] ON [dbo].[RecipeDetails]
-(
-	[UnitId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_Recipes_OutputItemId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_Recipes_OutputItemId] ON [dbo].[Recipes]
-(
-	[OutputItemId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_Recipes_OutputUnitId]    Script Date: 29/09/2026 07:48:02 ص ******/
-CREATE NONCLUSTERED INDEX [IX_Recipes_OutputUnitId] ON [dbo].[Recipes]
-(
-	[OutputUnitId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Categories] ADD  CONSTRAINT [DF_Categories_IsActive]  DEFAULT ((1)) FOR [IsActive]
-GO
-ALTER TABLE [dbo].[Categories] ADD  CONSTRAINT [DF_Categories_CreatedAt]  DEFAULT (sysdatetime()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[ItemCosts] ADD  CONSTRAINT [DF_ItemCosts_Currency]  DEFAULT (N'LYD') FOR [Currency]
-GO
-ALTER TABLE [dbo].[ItemCosts] ADD  CONSTRAINT [DF_ItemCosts_CreatedAt]  DEFAULT (sysdatetime()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[ItemPrices] ADD  DEFAULT (N'LYD') FOR [Currency]
-GO
-ALTER TABLE [dbo].[ItemPrices] ADD  DEFAULT ((1)) FOR [IsActive]
-GO
-ALTER TABLE [dbo].[ItemPrices] ADD  DEFAULT (sysdatetime()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[Items] ADD  CONSTRAINT [DF_Items_IsActive]  DEFAULT ((1)) FOR [IsActive]
-GO
-ALTER TABLE [dbo].[Items] ADD  CONSTRAINT [DF_Items_CreatedAt]  DEFAULT (sysdatetime()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[ItemTypes] ADD  CONSTRAINT [DF_ItemTypes_IsActive]  DEFAULT ((1)) FOR [IsActive]
-GO
-ALTER TABLE [dbo].[RecipeDetails] ADD  CONSTRAINT [DF_RecipeDetails_SequenceNo]  DEFAULT ((1)) FOR [SequenceNo]
-GO
-ALTER TABLE [dbo].[RecipeDetails] ADD  CONSTRAINT [DF_RecipeDetails_WastePercent]  DEFAULT ((0)) FOR [WastePercent]
-GO
-ALTER TABLE [dbo].[Recipes] ADD  CONSTRAINT [DF_Recipes_VersionNo]  DEFAULT ((1)) FOR [VersionNo]
-GO
-ALTER TABLE [dbo].[Recipes] ADD  CONSTRAINT [DF_Recipes_IsActive]  DEFAULT ((1)) FOR [IsActive]
-GO
-ALTER TABLE [dbo].[Recipes] ADD  CONSTRAINT [DF_Recipes_CreatedAt]  DEFAULT (sysdatetime()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[UnitConversions] ADD  DEFAULT ((1)) FOR [IsActive]
-GO
-ALTER TABLE [dbo].[UnitConversions] ADD  DEFAULT (sysdatetime()) FOR [CreatedAt]
-GO
-ALTER TABLE [dbo].[Units] ADD  CONSTRAINT [DF_Units_IsActive]  DEFAULT ((1)) FOR [IsActive]
-GO
-ALTER TABLE [dbo].[Categories]  WITH CHECK ADD  CONSTRAINT [FK_Categories_Parent] FOREIGN KEY([ParentCategoryId])
-REFERENCES [dbo].[Categories] ([CategoryId])
-GO
-ALTER TABLE [dbo].[Categories] CHECK CONSTRAINT [FK_Categories_Parent]
-GO
-ALTER TABLE [dbo].[ItemCosts]  WITH CHECK ADD  CONSTRAINT [FK_ItemCosts_Items] FOREIGN KEY([ItemId])
-REFERENCES [dbo].[Items] ([ItemId])
-GO
-ALTER TABLE [dbo].[ItemCosts] CHECK CONSTRAINT [FK_ItemCosts_Items]
-GO
-ALTER TABLE [dbo].[ItemCosts]  WITH CHECK ADD  CONSTRAINT [FK_ItemCosts_Recipes] FOREIGN KEY([SourceRecipeId])
-REFERENCES [dbo].[Recipes] ([RecipeId])
-GO
-ALTER TABLE [dbo].[ItemCosts] CHECK CONSTRAINT [FK_ItemCosts_Recipes]
-GO
-ALTER TABLE [dbo].[ItemCosts]  WITH CHECK ADD  CONSTRAINT [FK_ItemCosts_Units] FOREIGN KEY([UnitId])
-REFERENCES [dbo].[Units] ([UnitId])
-GO
-ALTER TABLE [dbo].[ItemCosts] CHECK CONSTRAINT [FK_ItemCosts_Units]
-GO
-ALTER TABLE [dbo].[ItemPrices]  WITH CHECK ADD  CONSTRAINT [FK_ItemPrices_Items] FOREIGN KEY([ItemId])
-REFERENCES [dbo].[Items] ([ItemId])
-GO
-ALTER TABLE [dbo].[ItemPrices] CHECK CONSTRAINT [FK_ItemPrices_Items]
-GO
-ALTER TABLE [dbo].[Items]  WITH CHECK ADD  CONSTRAINT [FK_Items_Category] FOREIGN KEY([CategoryId])
-REFERENCES [dbo].[Categories] ([CategoryId])
-GO
-ALTER TABLE [dbo].[Items] CHECK CONSTRAINT [FK_Items_Category]
-GO
-ALTER TABLE [dbo].[Items]  WITH CHECK ADD  CONSTRAINT [FK_Items_ItemType] FOREIGN KEY([ItemTypeId])
-REFERENCES [dbo].[ItemTypes] ([ItemTypeId])
-GO
-ALTER TABLE [dbo].[Items] CHECK CONSTRAINT [FK_Items_ItemType]
-GO
-ALTER TABLE [dbo].[Items]  WITH CHECK ADD  CONSTRAINT [FK_Items_Unit] FOREIGN KEY([UnitId])
-REFERENCES [dbo].[Units] ([UnitId])
-GO
-ALTER TABLE [dbo].[Items] CHECK CONSTRAINT [FK_Items_Unit]
-GO
-ALTER TABLE [dbo].[RecipeDetails]  WITH CHECK ADD  CONSTRAINT [FK_RecipeDetails_Item] FOREIGN KEY([IngredientItemId])
-REFERENCES [dbo].[Items] ([ItemId])
-GO
-ALTER TABLE [dbo].[RecipeDetails] CHECK CONSTRAINT [FK_RecipeDetails_Item]
-GO
-ALTER TABLE [dbo].[RecipeDetails]  WITH CHECK ADD  CONSTRAINT [FK_RecipeDetails_Recipe] FOREIGN KEY([RecipeId])
-REFERENCES [dbo].[Recipes] ([RecipeId])
-GO
-ALTER TABLE [dbo].[RecipeDetails] CHECK CONSTRAINT [FK_RecipeDetails_Recipe]
-GO
-ALTER TABLE [dbo].[RecipeDetails]  WITH CHECK ADD  CONSTRAINT [FK_RecipeDetails_Unit] FOREIGN KEY([UnitId])
-REFERENCES [dbo].[Units] ([UnitId])
-GO
-ALTER TABLE [dbo].[RecipeDetails] CHECK CONSTRAINT [FK_RecipeDetails_Unit]
-GO
-ALTER TABLE [dbo].[Recipes]  WITH CHECK ADD  CONSTRAINT [FK_Recipes_OutputItem] FOREIGN KEY([OutputItemId])
-REFERENCES [dbo].[Items] ([ItemId])
-GO
-ALTER TABLE [dbo].[Recipes] CHECK CONSTRAINT [FK_Recipes_OutputItem]
-GO
-ALTER TABLE [dbo].[Recipes]  WITH CHECK ADD  CONSTRAINT [FK_Recipes_OutputUnit] FOREIGN KEY([OutputUnitId])
-REFERENCES [dbo].[Units] ([UnitId])
-GO
-ALTER TABLE [dbo].[Recipes] CHECK CONSTRAINT [FK_Recipes_OutputUnit]
-GO
-ALTER TABLE [dbo].[UnitConversions]  WITH CHECK ADD  CONSTRAINT [FK_UnitConversions_FromUnit] FOREIGN KEY([FromUnitId])
-REFERENCES [dbo].[Units] ([UnitId])
-GO
-ALTER TABLE [dbo].[UnitConversions] CHECK CONSTRAINT [FK_UnitConversions_FromUnit]
-GO
-ALTER TABLE [dbo].[UnitConversions]  WITH CHECK ADD  CONSTRAINT [FK_UnitConversions_ToUnit] FOREIGN KEY([ToUnitId])
-REFERENCES [dbo].[Units] ([UnitId])
-GO
-ALTER TABLE [dbo].[UnitConversions] CHECK CONSTRAINT [FK_UnitConversions_ToUnit]
-GO
-ALTER TABLE [dbo].[ItemCosts]  WITH CHECK ADD  CONSTRAINT [CK_ItemCosts_Cost] CHECK  (([CostPerUnit]>=(0)))
-GO
-ALTER TABLE [dbo].[ItemCosts] CHECK CONSTRAINT [CK_ItemCosts_Cost]
-GO
-ALTER TABLE [dbo].[ItemPrices]  WITH CHECK ADD  CONSTRAINT [CK_ItemPrices_Price] CHECK  (([Price]>=(0)))
-GO
-ALTER TABLE [dbo].[ItemPrices] CHECK CONSTRAINT [CK_ItemPrices_Price]
-GO
-ALTER TABLE [dbo].[RecipeDetails]  WITH CHECK ADD  CONSTRAINT [CK_RecipeDetails_Quantity] CHECK  (([Quantity]>(0)))
-GO
-ALTER TABLE [dbo].[RecipeDetails] CHECK CONSTRAINT [CK_RecipeDetails_Quantity]
-GO
-ALTER TABLE [dbo].[RecipeDetails]  WITH CHECK ADD  CONSTRAINT [CK_RecipeDetails_SequenceNo] CHECK  (([SequenceNo]>(0)))
-GO
-ALTER TABLE [dbo].[RecipeDetails] CHECK CONSTRAINT [CK_RecipeDetails_SequenceNo]
-GO
-ALTER TABLE [dbo].[RecipeDetails]  WITH CHECK ADD  CONSTRAINT [CK_RecipeDetails_WastePercent] CHECK  (([WastePercent]>=(0) AND [WastePercent]<=(100)))
-GO
-ALTER TABLE [dbo].[RecipeDetails] CHECK CONSTRAINT [CK_RecipeDetails_WastePercent]
-GO
-ALTER TABLE [dbo].[Recipes]  WITH CHECK ADD  CONSTRAINT [CK_Recipes_OutputQuantity] CHECK  (([OutputQuantity]>(0)))
-GO
-ALTER TABLE [dbo].[Recipes] CHECK CONSTRAINT [CK_Recipes_OutputQuantity]
-GO
-ALTER TABLE [dbo].[Recipes]  WITH CHECK ADD  CONSTRAINT [CK_Recipes_VersionNo] CHECK  (([VersionNo]>(0)))
-GO
-ALTER TABLE [dbo].[Recipes] CHECK CONSTRAINT [CK_Recipes_VersionNo]
-GO
-ALTER TABLE [dbo].[UnitConversions]  WITH CHECK ADD  CONSTRAINT [CK_UnitConversions_DifferentUnits] CHECK  (([FromUnitId]<>[ToUnitId]))
-GO
-ALTER TABLE [dbo].[UnitConversions] CHECK CONSTRAINT [CK_UnitConversions_DifferentUnits]
-GO
-ALTER TABLE [dbo].[UnitConversions]  WITH CHECK ADD  CONSTRAINT [CK_UnitConversions_Factor] CHECK  (([ConversionFactor]>(0)))
-GO
-ALTER TABLE [dbo].[UnitConversions] CHECK CONSTRAINT [CK_UnitConversions_Factor]
-GO
-/****** Object:  StoredProcedure [dbo].[Category_Delete]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Category_Delete]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Category_Delete]
+CREATE PROCEDURE [dbo].[Category_Delete]
     @CategoryId INT
 AS
 BEGIN
@@ -582,7 +91,7 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Category_GetAll]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Category_GetAll]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -593,7 +102,7 @@ GO
    CATEGORIES
    ========================================================= */
 
-CREATE   PROCEDURE [dbo].[Category_GetAll]
+CREATE PROCEDURE [dbo].[Category_GetAll]
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -608,14 +117,14 @@ BEGIN
     ORDER BY CategoryName;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Category_GetById]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Category_GetById]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Category_GetById]
+CREATE PROCEDURE [dbo].[Category_GetById]
     @CategoryId INT
 AS
 BEGIN
@@ -631,14 +140,14 @@ BEGIN
     WHERE CategoryId = @CategoryId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Category_Insert]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Category_Insert]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Category_Insert]
+CREATE PROCEDURE [dbo].[Category_Insert]
     @CategoryName NVARCHAR(100),
     @ParentCategoryId INT = NULL
 AS
@@ -715,14 +224,14 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Category_Update]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Category_Update]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Category_Update]
+CREATE PROCEDURE [dbo].[Category_Update]
     @CategoryId INT,
     @CategoryName NVARCHAR(100),
     @ParentCategoryId INT = NULL
@@ -817,14 +326,14 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Item_Delete]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Item_Delete]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Item_Delete]
+CREATE PROCEDURE [dbo].[Item_Delete]
     @ItemId INT
 AS
 BEGIN
@@ -870,7 +379,7 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Item_GetAll]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Item_GetAll]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -881,7 +390,7 @@ GO
    ITEMS
    ========================================================= */
 
-CREATE   PROCEDURE [dbo].[Item_GetAll]
+CREATE PROCEDURE [dbo].[Item_GetAll]
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -920,14 +429,14 @@ BEGIN
     ORDER BY i.ItemName;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Item_GetById]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Item_GetById]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Item_GetById]
+CREATE PROCEDURE [dbo].[Item_GetById]
     @ItemId INT
 AS
 BEGIN
@@ -967,14 +476,14 @@ BEGIN
     WHERE i.ItemId = @ItemId AND i.IsActive=1
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Item_Insert]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Item_Insert]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Item_Insert]
+CREATE PROCEDURE [dbo].[Item_Insert]
     @ItemCode NVARCHAR(50),
     @ItemName NVARCHAR(200),
     @ItemTypeId TINYINT,
@@ -1113,14 +622,14 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Item_Search]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Item_Search]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Item_Search]
+CREATE PROCEDURE [dbo].[Item_Search]
     @Search NVARCHAR(200) = NULL,
     @ItemTypeId TINYINT = NULL,
     @CategoryId INT = NULL
@@ -1183,14 +692,14 @@ BEGIN
     ORDER BY i.ItemName;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Item_Update]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Item_Update]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Item_Update]
+CREATE PROCEDURE [dbo].[Item_Update]
     @ItemId INT,
     @ItemCode NVARCHAR(50),
     @ItemName NVARCHAR(200),
@@ -1337,13 +846,13 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[ItemCost_RecalculateFromItem]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[ItemCost_RecalculateFromItem]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[ItemCost_RecalculateFromItem]
+CREATE PROCEDURE [dbo].[ItemCost_RecalculateFromItem]
     @ItemId INT,
     @AsOfDate DATE = NULL
 AS
@@ -1444,7 +953,7 @@ BEGIN
         r.RecipeCode,
         i.ItemId,
         i.ItemCode,
-        i.ItemNameAr,
+        i.ItemName,
         r.ActualOutputQuantity,
         ic.CostPerUnit,
         ic.Currency,
@@ -1462,13 +971,13 @@ BEGIN
         r.RecipeId;
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[ItemPrice_ActivateDuePrices]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[ItemPrice_ActivateDuePrices]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[ItemPrice_ActivateDuePrices]
+CREATE PROCEDURE [dbo].[ItemPrice_ActivateDuePrices]
     @AsOfDate DATE = NULL
 AS
 BEGIN
@@ -1602,7 +1111,7 @@ BEGIN
             ip.ItemPriceId,
             ip.ItemId,
             i.ItemCode,
-            i.ItemNameAr,
+            i.ItemName,
             ip.Price,
             ip.UnitId,
             ip.Currency,
@@ -1627,13 +1136,13 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[ItemPrice_Set]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[ItemPrice_Set]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[ItemPrice_Set]
+CREATE PROCEDURE [dbo].[ItemPrice_Set]
     @ItemId INT,
     @Price DECIMAL(18,4),
     @UnitId INT,
@@ -1758,7 +1267,45 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[ItemType_GetAll]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[ItemType_Delete]    Script Date: 29/09/2026 03:45:20 م ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE   PROCEDURE [dbo].[ItemType_Delete]
+    @ItemTypeId TINYINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.ItemTypes
+            WHERE ItemTypeId = @ItemTypeId
+        )
+        BEGIN
+            THROW 50001, N'نوع الصنف غير موجود.', 1;
+        END;
+
+        UPDATE dbo.ItemTypes
+        SET
+            IsActive = 0
+        WHERE ItemTypeId = @ItemTypeId;
+
+    END TRY
+
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[ItemType_GetAll]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1769,7 +1316,7 @@ GO
    ITEM TYPES
    ========================================================= */
 
-CREATE   PROCEDURE [dbo].[ItemType_GetAll]
+CREATE PROCEDURE [dbo].[ItemType_GetAll]
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -1783,14 +1330,14 @@ BEGIN
     ORDER BY ItemTypeId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[ItemType_GetById]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[ItemType_GetById]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[ItemType_GetById]
+CREATE PROCEDURE [dbo].[ItemType_GetById]
     @ItemTypeId TINYINT
 AS
 BEGIN
@@ -1798,14 +1345,209 @@ BEGIN
 
     SELECT
         ItemTypeId,
-        TypeNameAr,
-        TypeNameEn,
+        TypeName,
         IsActive
     FROM dbo.ItemTypes
     WHERE ItemTypeId = @ItemTypeId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Recipe_GetAll]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[ItemType_Insert]    Script Date: 29/09/2026 03:45:20 م ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE   PROCEDURE [dbo].[ItemType_Insert]
+    @TypeName NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+
+        SET @TypeName = LTRIM(RTRIM(@TypeName));
+
+        IF NULLIF(@TypeName, N'') IS NULL
+        BEGIN
+            THROW 50001, N'اسم نوع الصنف مطلوب.', 1;
+        END;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM dbo.ItemTypes
+            WHERE TypeName = @TypeName
+        )
+        BEGIN
+            THROW 50002, N'نوع الصنف موجود مسبقاً.', 1;
+        END;
+
+        INSERT INTO dbo.ItemTypes
+        (
+            TypeName
+        )
+        VALUES
+        (
+            @TypeName
+        );
+
+        DECLARE @ItemTypeId TINYINT =
+            CONVERT(TINYINT, SCOPE_IDENTITY());
+
+        SELECT
+            ItemTypeId,
+            TypeName,
+            IsActive
+        FROM dbo.ItemTypes
+        WHERE ItemTypeId = @ItemTypeId;
+
+    END TRY
+
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[ItemType_Update]    Script Date: 29/09/2026 03:45:20 م ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   PROCEDURE [dbo].[ItemType_Update]
+    @ItemTypeId TINYINT,
+    @TypeName NVARCHAR(50),
+    @IsActive BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+
+        SET @TypeName = LTRIM(RTRIM(@TypeName));
+
+        IF NULLIF(@TypeName, N'') IS NULL
+        BEGIN
+            THROW 50001, N'اسم نوع الصنف مطلوب.', 1;
+        END;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.ItemTypes
+            WHERE ItemTypeId = @ItemTypeId
+        )
+        BEGIN
+            THROW 50002, N'نوع الصنف غير موجود.', 1;
+        END;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM dbo.ItemTypes
+            WHERE TypeName = @TypeName
+              AND ItemTypeId <> @ItemTypeId
+        )
+        BEGIN
+            THROW 50003, N'نوع الصنف موجود مسبقاً.', 1;
+        END;
+
+        UPDATE dbo.ItemTypes
+        SET
+            TypeName = @TypeName,
+            IsActive = @IsActive
+        WHERE ItemTypeId = @ItemTypeId;
+
+    END TRY
+
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Recipe_Deactivate]    Script Date: 29/09/2026 03:45:20 م ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   PROCEDURE [dbo].[Recipe_Deactivate]
+    @RecipeId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.Recipes
+            WHERE RecipeId = @RecipeId
+        )
+        BEGIN
+            SELECT
+                -1 AS ResultCode,
+                N'الوصفة غير موجودة' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM dbo.Recipes
+            WHERE RecipeId = @RecipeId
+              AND IsActive = 0
+        )
+        BEGIN
+            SELECT
+                -2 AS ResultCode,
+                N'الوصفة معطلة بالفعل' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM dbo.RecipeDetails rd
+            INNER JOIN dbo.Recipes r
+                ON r.OutputItemId = rd.IngredientItemId
+               AND r.IsActive = 1
+            WHERE rd.RecipeId = @RecipeId
+        )
+        BEGIN
+            SELECT
+                -3 AS ResultCode,
+                N'لا يمكن تعطيل الوصفة لأنها تحتوي على مكونات مرتبطة بوصفات نشطة' AS ResultMessage;
+            RETURN;
+        END;
+
+        UPDATE dbo.Recipes
+        SET
+            IsActive = 0,
+            UpdatedAt = SYSDATETIME()
+        WHERE RecipeId = @RecipeId;
+
+        SELECT
+            1 AS ResultCode,
+            N'تم تعطيل الوصفة بنجاح' AS ResultMessage,
+            @RecipeId AS RecipeId;
+
+    END TRY
+
+    BEGIN CATCH
+
+        SELECT
+            -500 AS ResultCode,
+            N'حدث خطأ أثناء تعطيل الوصفة' AS ResultMessage,
+            ERROR_NUMBER() AS ErrorNumber,
+            ERROR_MESSAGE() AS ErrorMessage;
+
+    END CATCH
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Recipe_GetAll]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1816,7 +1558,7 @@ GO
    RECIPES
    ========================================================= */
 
-CREATE   PROCEDURE [dbo].[Recipe_GetAll]
+CREATE PROCEDURE [dbo].[Recipe_GetAll]
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -1824,17 +1566,16 @@ BEGIN
     SELECT
         r.RecipeId,
         r.RecipeCode,
-        r.RecipeNameAr,
-        r.RecipeNameEn,
+        r.RecipeName,
 
         r.OutputItemId,
         i.ItemCode AS OutputItemCode,
-        i.ItemNameAr AS OutputItemNameAr,
+        i.Itemname AS OutputItemName,
 
         r.OutputQuantity,
 
         r.OutputUnitId,
-        u.UnitNameAr AS OutputUnitNameAr,
+        u.Unitname AS OutputUnitName,
         u.Symbol AS OutputUnitSymbol,
 
         r.VersionNo,
@@ -1851,17 +1592,15 @@ BEGIN
     INNER JOIN dbo.Units u
         ON r.OutputUnitId = u.UnitId
 
-    ORDER BY r.RecipeNameAr;
+    ORDER BY r.Recipename;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Recipe_GetById]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Recipe_GetById]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
-
-CREATE   PROCEDURE [dbo].[Recipe_GetById]
+CREATE PROCEDURE [dbo].[Recipe_GetById]
     @RecipeId INT
 AS
 BEGIN
@@ -1870,24 +1609,26 @@ BEGIN
     SELECT
         r.RecipeId,
         r.RecipeCode,
-        r.RecipeNameAr,
-        r.RecipeNameEn,
+        r.RecipeName,
 
         r.OutputItemId,
         i.ItemCode AS OutputItemCode,
-        i.ItemNameAr AS OutputItemNameAr,
+        i.Itemname AS OutputItemName,
 
         r.OutputQuantity,
 
         r.OutputUnitId,
-        u.UnitNameAr AS OutputUnitNameAr,
+        u.Unitname AS OutputUnitName,
         u.Symbol AS OutputUnitSymbol,
 
         r.VersionNo,
         r.IsActive,
         r.Notes,
         r.CreatedAt,
-        r.UpdatedAt
+        r.UpdatedAt,
+
+        r.ActualOutputQuantity,
+        r.BatchInputQuantity
 
     FROM dbo.Recipes r
 
@@ -1900,13 +1641,13 @@ BEGIN
     WHERE r.RecipeId = @RecipeId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Recipe_GetByIngredient]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Recipe_GetByIngredient]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[Recipe_GetByIngredient]
+CREATE PROCEDURE [dbo].[Recipe_GetByIngredient]
     @IngredientItemId INT
 AS
 BEGIN
@@ -1915,11 +1656,10 @@ BEGIN
     SELECT
         r.RecipeId,
         r.RecipeCode,
-        r.RecipeNameAr,
-        r.RecipeNameEn,
+        r.RecipeName,
         r.OutputItemId,
         i.ItemCode AS OutputItemCode,
-        i.ItemNameAr AS OutputItemNameAr,
+        i.Itemname AS OutputItemName,
         r.VersionNo,
         r.IsActive
     FROM dbo.RecipeDetails rd
@@ -1938,15 +1678,14 @@ BEGIN
         r.RecipeId DESC
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Recipe_Insert]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Recipe_Insert]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE   PROCEDURE [dbo].[Recipe_Insert]
+CREATE PROCEDURE [dbo].[Recipe_Insert]
     @RecipeCode NVARCHAR(50),
-    @RecipeNameAr NVARCHAR(200),
-    @RecipeNameEn NVARCHAR(200) = NULL,
+    @RecipeName NVARCHAR(200),
     @OutputItemId INT,
     @OutputQuantity DECIMAL(18,4),
     @OutputUnitId INT,
@@ -1959,8 +1698,7 @@ BEGIN
     INSERT INTO dbo.Recipes
     (
         RecipeCode,
-        RecipeNameAr,
-        RecipeNameEn,
+        RecipeName,
         OutputItemId,
         OutputQuantity,
         OutputUnitId,
@@ -1970,8 +1708,7 @@ BEGIN
     VALUES
     (
         @RecipeCode,
-        @RecipeNameAr,
-        @RecipeNameEn,
+        @RecipeName,
         @OutputItemId,
         @OutputQuantity,
         @OutputUnitId,
@@ -1982,13 +1719,13 @@ BEGIN
     SELECT CAST(SCOPE_IDENTITY() AS INT) AS RecipeId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Recipe_RecalculateCost]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Recipe_RecalculateCost]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[Recipe_RecalculateCost]
+CREATE PROCEDURE [dbo].[Recipe_RecalculateCost]
     @RecipeId INT,
     @AsOfDate DATE = NULL
 AS
@@ -2015,7 +1752,7 @@ BEGIN
         r.RecipeCode,
         i.ItemId,
         i.ItemCode,
-        i.ItemNameAr,
+        i.ItemName,
         r.ActualOutputQuantity,
         ic.CostPerUnit,
         ic.Currency,
@@ -2029,13 +1766,13 @@ BEGIN
     WHERE r.RecipeId = @RecipeId;
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Recipe_RecalculateCost_Internal]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Recipe_RecalculateCost_Internal]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[Recipe_RecalculateCost_Internal]
+CREATE PROCEDURE [dbo].[Recipe_RecalculateCost_Internal]
     @RecipeId INT,
     @AsOfDate DATE = NULL
 AS
@@ -2345,18 +2082,17 @@ BEGIN
 
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Recipe_Save]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Recipe_Save]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[Recipe_Save]
+CREATE PROCEDURE [dbo].[Recipe_Save]
     @RecipeId INT = NULL,
 
     @RecipeCode NVARCHAR(50),
-    @RecipeNameAr NVARCHAR(200),
-    @RecipeNameEn NVARCHAR(200) = NULL,
+    @Recipename NVARCHAR(200),
 
     @OutputItemId INT,
     @OutputQuantity DECIMAL(18,4),
@@ -2381,8 +2117,7 @@ BEGIN
            ===================================================== */
 
         SET @RecipeCode   = LTRIM(RTRIM(@RecipeCode));
-        SET @RecipeNameAr = LTRIM(RTRIM(@RecipeNameAr));
-        SET @RecipeNameEn = NULLIF(LTRIM(RTRIM(@RecipeNameEn)), N'');
+        SET @RecipeName = LTRIM(RTRIM(@Recipename));
         SET @Notes        = NULLIF(LTRIM(RTRIM(@Notes)), N'');
 
 
@@ -2401,7 +2136,7 @@ BEGIN
         END;
 
 
-        IF NULLIF(@RecipeNameAr, N'') IS NULL
+        IF NULLIF(@RecipeName, N'') IS NULL
         BEGIN
             ROLLBACK;
 
@@ -2728,7 +2463,7 @@ BEGIN
         DECLARE @CircularDependency TABLE
         (
             IngredientItemId INT NOT NULL,
-            ItemNameAr NVARCHAR(200) NULL,
+            Itemname NVARCHAR(200) NULL,
             DependencyPath NVARCHAR(MAX) NULL
         );
 
@@ -2803,13 +2538,13 @@ BEGIN
         INSERT INTO @CircularDependency
         (
             IngredientItemId,
-            ItemNameAr,
+            ItemName,
             DependencyPath
         )
 
         SELECT TOP 1
             x.IngredientItemId,
-            i.ItemNameAr,
+            i.ItemName,
             rg.Path
 
         FROM @Ingredients x
@@ -2842,7 +2577,7 @@ BEGIN
 
             SELECT TOP 1
                 @CircularItemId = IngredientItemId,
-                @CircularItemName = ItemNameAr,
+                @CircularItemName = ItemName,
                 @DependencyPath = DependencyPath
             FROM @CircularDependency;
 
@@ -2875,8 +2610,7 @@ BEGIN
             INSERT INTO dbo.Recipes
             (
                 RecipeCode,
-                RecipeNameAr,
-                RecipeNameEn,
+                RecipeName,
                 OutputItemId,
                 OutputQuantity,
                 OutputUnitId,
@@ -2888,8 +2622,7 @@ BEGIN
             VALUES
             (
                 @RecipeCode,
-                @RecipeNameAr,
-                @RecipeNameEn,
+                @RecipeName,
                 @OutputItemId,
                 @OutputQuantity,
                 @OutputUnitId,
@@ -2911,8 +2644,7 @@ BEGIN
             UPDATE dbo.Recipes
             SET
                 RecipeCode = @RecipeCode,
-                RecipeNameAr = @RecipeNameAr,
-                RecipeNameEn = @RecipeNameEn,
+                RecipeName = @RecipeName,
 
                 OutputItemId = @OutputItemId,
                 OutputQuantity = @OutputQuantity,
@@ -3076,14 +2808,14 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[RecipeDetail_Delete]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[RecipeDetail_Delete]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[RecipeDetail_Delete]
+CREATE PROCEDURE [dbo].[RecipeDetail_Delete]
     @RecipeDetailId BIGINT
 AS
 BEGIN
@@ -3127,7 +2859,7 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[RecipeDetail_GetByRecipeId]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[RecipeDetail_GetByRecipeId]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3138,7 +2870,7 @@ GO
    RECIPE DETAILS
    ========================================================= */
 
-CREATE   PROCEDURE [dbo].[RecipeDetail_GetByRecipeId]
+CREATE PROCEDURE [dbo].[RecipeDetail_GetByRecipeId]
     @RecipeId INT
 AS
 BEGIN
@@ -3150,14 +2882,13 @@ BEGIN
 
         rd.IngredientItemId,
         i.ItemCode,
-        i.ItemNameAr,
-        i.ItemNameEn,
+        i.ItemName,
+
 
         rd.Quantity,
 
         rd.UnitId,
-        u.UnitNameAr,
-        u.UnitNameEn,
+        u.UnitName,
         u.Symbol,
 
         rd.SequenceNo,
@@ -3179,12 +2910,12 @@ BEGIN
         rd.RecipeDetailId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[RecipeDetail_Insert]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[RecipeDetail_Insert]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE   PROCEDURE [dbo].[RecipeDetail_Insert]
+CREATE PROCEDURE [dbo].[RecipeDetail_Insert]
     @RecipeId INT,
     @IngredientItemId INT,
     @Quantity DECIMAL(18,4),
@@ -3220,14 +2951,14 @@ BEGIN
     SELECT CAST(SCOPE_IDENTITY() AS BIGINT) AS RecipeDetailId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[RecipeDetail_Update]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[RecipeDetail_Update]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[RecipeDetail_Update]
+CREATE PROCEDURE [dbo].[RecipeDetail_Update]
     @RecipeDetailId BIGINT,
     @IngredientItemId INT,
     @Quantity DECIMAL(18,4),
@@ -3334,13 +3065,13 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Unit_Convert]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Unit_Convert]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE   PROCEDURE [dbo].[Unit_Convert]
+CREATE PROCEDURE [dbo].[Unit_Convert]
     @Quantity DECIMAL(18,4),
     @FromUnitId INT,
     @ToUnitId INT
@@ -3386,14 +3117,14 @@ BEGIN
         @Result AS ConvertedQuantity;
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[Unit_Delete]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Unit_Delete]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Unit_Delete]
+CREATE PROCEDURE [dbo].[Unit_Delete]
     @UnitId INT
 AS
 BEGIN
@@ -3452,7 +3183,7 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Unit_GetAll]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Unit_GetAll]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -3463,30 +3194,29 @@ GO
    UNITS
    ========================================================= */
 
-CREATE   PROCEDURE [dbo].[Unit_GetAll]
+CREATE PROCEDURE [dbo].[Unit_GetAll]
 AS
 BEGIN
     SET NOCOUNT ON;
 
     SELECT
         UnitId,
-        UnitNameAr,
-        UnitNameEn,
+        UnitName,
         Symbol,
         IsActive
     FROM dbo.Units
     WHERE IsActive = 1
-    ORDER BY UnitNameAr;
+    ORDER BY Unitname;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Unit_GetById]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Unit_GetById]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Unit_GetById]
+CREATE PROCEDURE [dbo].[Unit_GetById]
     @UnitId INT
 AS
 BEGIN
@@ -3494,24 +3224,20 @@ BEGIN
 
     SELECT
         UnitId,
-        UnitNameAr,
-        UnitNameEn,
+        UnitName,
         Symbol,
         IsActive
     FROM dbo.Units
     WHERE UnitId = @UnitId;
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Unit_Insert]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Unit_Insert]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
-
 CREATE   PROCEDURE [dbo].[Unit_Insert]
-    @UnitNameAr NVARCHAR(50),
-    @UnitNameEn NVARCHAR(50),
+    @UnitName NVARCHAR(50),
     @Symbol NVARCHAR(10) = NULL
 AS
 BEGIN
@@ -3520,94 +3246,64 @@ BEGIN
 
     BEGIN TRY
 
-        SET @UnitNameAr = LTRIM(RTRIM(@UnitNameAr));
-        SET @UnitNameEn = LTRIM(RTRIM(@UnitNameEn));
-        SET @Symbol = NULLIF(LTRIM(RTRIM(@Symbol)), N'');
+        SET @UnitName = LTRIM(RTRIM(@UnitName));
+        SET @Symbol = NULLIF(LTRIM(RTRIM(@Symbol)), N'')
 
-        IF NULLIF(@UnitNameAr, N'') IS NULL
+        IF NULLIF(@UnitName, N'') IS NULL
         BEGIN
-            SELECT
-                -1 AS ResultCode,
-                N'اسم الوحدة بالعربي مطلوب' AS ResultMessage;
-            RETURN;
-        END;
-
-        IF NULLIF(@UnitNameEn, N'') IS NULL
-        BEGIN
-            SELECT
-                -2 AS ResultCode,
-                N'اسم الوحدة بالإنجليزية مطلوب' AS ResultMessage;
-            RETURN;
-        END;
+            THROW 50001, N'اسم الوحدة مطلوب.', 1
+        END
 
         IF EXISTS
         (
             SELECT 1
             FROM dbo.Units
-            WHERE UnitNameAr = @UnitNameAr
+            WHERE UnitName = @UnitName
         )
         BEGIN
-            SELECT
-                -3 AS ResultCode,
-                N'اسم الوحدة العربي موجود مسبقاً' AS ResultMessage;
-            RETURN;
-        END;
-
-        IF EXISTS
-        (
-            SELECT 1
-            FROM dbo.Units
-            WHERE UnitNameEn = @UnitNameEn
-        )
-        BEGIN
-            SELECT
-                -4 AS ResultCode,
-                N'اسم الوحدة الإنجليزي موجود مسبقاً' AS ResultMessage;
-            RETURN;
-        END;
+            THROW 50002, N'اسم الوحدة موجود مسبقاً.', 1
+        END
 
         INSERT INTO dbo.Units
         (
-            UnitNameAr,
-            UnitNameEn,
+            UnitName,
             Symbol
         )
         VALUES
         (
-            @UnitNameAr,
-            @UnitNameEn,
+            @UnitName,
             @Symbol
-        );
+        )
+
+        DECLARE @UnitId INT = CONVERT(INT, SCOPE_IDENTITY())
 
         SELECT
-            1 AS ResultCode,
-            N'تمت إضافة الوحدة بنجاح' AS ResultMessage,
-            CAST(SCOPE_IDENTITY() AS INT) AS UnitId;
+            UnitId,
+            UnitName,
+            Symbol,
+            IsActive
+        FROM dbo.Units
+        WHERE UnitId = @UnitId
 
     END TRY
 
     BEGIN CATCH
 
-        SELECT
-            -500 AS ResultCode,
-            N'حدث خطأ أثناء إضافة الوحدة' AS ResultMessage,
-            ERROR_NUMBER() AS ErrorNumber,
-            ERROR_MESSAGE() AS ErrorMessage;
+        THROW;
 
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Unit_Update]    Script Date: 29/09/2026 07:48:02 ص ******/
+/****** Object:  StoredProcedure [dbo].[Unit_Update]    Script Date: 29/09/2026 03:45:20 م ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   PROCEDURE [dbo].[Unit_Update]
+CREATE PROCEDURE [dbo].[Unit_Update]
     @UnitId INT,
-    @UnitNameAr NVARCHAR(50),
-    @UnitNameEn NVARCHAR(50),
+    @Unitname NVARCHAR(50),
     @Symbol NVARCHAR(10) = NULL
 AS
 BEGIN
@@ -3616,8 +3312,7 @@ BEGIN
 
     BEGIN TRY
 
-        SET @UnitNameAr = LTRIM(RTRIM(@UnitNameAr));
-        SET @UnitNameEn = LTRIM(RTRIM(@UnitNameEn));
+        SET @UnitName = LTRIM(RTRIM(@Unitname));
         SET @Symbol = NULLIF(LTRIM(RTRIM(@Symbol)), N'');
 
         IF NOT EXISTS
@@ -3633,7 +3328,7 @@ BEGIN
             RETURN;
         END;
 
-        IF NULLIF(@UnitNameAr, N'') IS NULL
+        IF NULLIF(@UnitName, N'') IS NULL
         BEGIN
             SELECT
                 -2 AS ResultCode,
@@ -3641,19 +3336,11 @@ BEGIN
             RETURN;
         END;
 
-        IF NULLIF(@UnitNameEn, N'') IS NULL
-        BEGIN
-            SELECT
-                -3 AS ResultCode,
-                N'اسم الوحدة بالإنجليزية مطلوب' AS ResultMessage;
-            RETURN;
-        END;
-
         IF EXISTS
         (
             SELECT 1
             FROM dbo.Units
-            WHERE UnitNameAr = @UnitNameAr
+            WHERE UnitName = @Unitname
               AND UnitId <> @UnitId
         )
         BEGIN
@@ -3661,26 +3348,11 @@ BEGIN
                 -4 AS ResultCode,
                 N'اسم الوحدة العربي مستخدم مسبقاً' AS ResultMessage;
             RETURN;
-        END;
-
-        IF EXISTS
-        (
-            SELECT 1
-            FROM dbo.Units
-            WHERE UnitNameEn = @UnitNameEn
-              AND UnitId <> @UnitId
-        )
-        BEGIN
-            SELECT
-                -5 AS ResultCode,
-                N'اسم الوحدة الإنجليزي مستخدم مسبقاً' AS ResultMessage;
-            RETURN;
-        END;
+        END;       
 
         UPDATE dbo.Units
         SET
-            UnitNameAr = @UnitNameAr,
-            UnitNameEn = @UnitNameEn,
+            UnitName = @UnitName,
             Symbol = @Symbol
         WHERE UnitId = @UnitId;
 
@@ -3701,8 +3373,4 @@ BEGIN
 
     END CATCH
 END
-GO
-USE [master]
-GO
-ALTER DATABASE [ValrhonaDb] SET  READ_WRITE 
 GO
