@@ -8,5 +8,8 @@ public static class EndpointExtensions
     {
         app.MapItemEndpoint();
         app.MapCategoryEndpoint();
+        app.MapUnitEndpoint();
+        app.MapItemTypeEndpoint();
+        app.MapRecipeEndpoint();
     }
 }

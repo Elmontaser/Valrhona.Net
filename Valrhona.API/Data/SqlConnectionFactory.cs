@@ -11,12 +11,12 @@ public class SqlConnectionFactory
     public SqlConnectionFactory(IConfiguration configuration)
     {
         _connectionString =
-            configuration.GetConnectionString("DefaultConnection")
+            configuration.GetConnectionString("DesktopConnection")
             ?? throw new InvalidOperationException(
                 "Connection string 'DefaultConnection' was not found.");
     }
 
-    public  IDbConnection CreateConnection()
+    public IDbConnection CreateConnection()
     {
         return new SqlConnection(_connectionString);
     }

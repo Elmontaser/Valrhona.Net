@@ -13,7 +13,7 @@ Accept: application/json
 Content-Type:application/json
 
 { 
-    "itemCode": "RM-TEST-002", 
+    "itemCode": "RM-TEST-009", 
     "itemName": "مادة 1 اختبار", 
     "itemTypeId": 1, 
     "categoryId": 1, 
@@ -46,3 +46,163 @@ GET {{Valrhona.API_HostAddress}}/items/search?CategoryId=1
 
 ###GetAll
 GET {{Valrhona.API_HostAddress}}/categories
+
+
+###GetByID
+GET {{Valrhona.API_HostAddress}}/categories/2
+
+
+###GetByID
+PUT {{Valrhona.API_HostAddress}}/categories/2
+Content-Type: application/json
+
+{
+  "categoryId": 2,
+  "categoryName": "نصف مصنع",
+  "parentCategoryId": null
+}
+
+
+###UNIT
+
+###GetAll
+GET {{Valrhona.API_HostAddress}}/units
+
+
+###GetByID
+GET {{Valrhona.API_HostAddress}}/units/14
+
+
+###Add new
+POST {{Valrhona.API_HostAddress}}/units
+Content-Type: application/json
+
+{
+  "unitName": "اختبار",
+  "symbol": "TEST"
+}
+
+###Edit
+PUT  {{Valrhona.API_HostAddress}}/units/14
+Content-Type: application/json
+
+{
+  "unitId": 14,
+  "unitName": "اختبار معدل",
+  "symbol": "TES33333T2"
+}
+
+
+### Disable Unit
+DELETE {{Valrhona.API_HostAddress}}/units/14
+
+###Item Types
+
+### Get All Item Types
+GET {{Valrhona.API_HostAddress}}/itemtypes
+
+### Get Item Type By ID
+GET {{Valrhona.API_HostAddress}}/itemtypes/6
+
+### Create Item Type
+POST {{Valrhona.API_HostAddress}}/itemtypes
+Content-Type: application/json
+
+{
+  "typeName": "اختبارAPI",
+  "isActive": true
+}
+
+### Update Item Type
+PUT {{Valrhona.API_HostAddress}}/itemtypes/6
+Content-Type: application/json
+
+{
+  "typeName": "اختبار API معدل",
+  "isActive": true
+}
+
+### Disable Item Type
+DELETE {{Valrhona.API_HostAddress}}/itemtypes/6
+
+
+
+
+
+### Recipes - Get All
+GET {{Valrhona.API_HostAddress}}/recipes
+
+### Recipe - Get By Id
+GET {{Valrhona.API_HostAddress}}/recipes/7
+
+
+###
+POST {{Valrhona.API_HostAddress}}/recipes
+Content-Type: application/json
+
+{
+  "recipeCode": "API-TEST-REC-003",
+  "recipeName": "وصفة اختبار API 003",
+  "outputItemId": 13,
+  "outputQuantity": 1,
+  "outputUnitId": 1,
+  "versionNo": 1,
+  "notes": "اختبار إنشاء وصفة من API",
+  "ingredients": [
+    {
+      "ingredientItemId": 3,
+      "quantity": 0.5,
+      "unitId": 1,
+      "sequenceNo": 1,
+      "wastePercent": 0,
+      "notes": "دقيق"
+    },
+    {
+      "ingredientItemId": 5,
+      "quantity": 0.2,
+      "unitId": 1,
+      "sequenceNo": 2,
+      "wastePercent": 0,
+      "notes": "سكر ناعم"
+    }
+  ]
+}
+
+
+
+###
+PUT {{Valrhona.API_HostAddress}}/recipes/7
+Content-Type: application/json
+
+{
+  "recipeId": 7,
+  "recipeCode": "API-TEST-REC-003",
+  "recipeName": "وصفة اختبار API 003 - معدل",
+  "outputItemId": 13,
+  "outputQuantity": 1,
+  "outputUnitId": 1,
+  "versionNo": 2,
+  "notes": "تم تعديل الوصفة عبر PUT",
+
+  "ingredients": [
+    {
+      "ingredientItemId": 3,
+      "quantity": 0.6,
+      "unitId": 1,
+      "sequenceNo": 1,
+      "wastePercent": 0,
+      "notes": "دقيق - معدل"
+    },
+    {
+      "ingredientItemId": 5,
+      "quantity": 0.25,
+      "unitId": 1,
+      "sequenceNo": 2,
+      "wastePercent": 0,
+      "notes": "سكر ناعم - معدل"
+    }
+  ]
+}
+
+###
+DELETE {{Valrhona.API_HostAddress}}/recipes/7
