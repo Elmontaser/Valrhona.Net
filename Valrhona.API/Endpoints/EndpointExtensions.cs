@@ -11,5 +11,9 @@ public static class EndpointExtensions
         app.MapUnitEndpoint();
         app.MapItemTypeEndpoint();
         app.MapRecipeEndpoint();
+        app.MapRecipeDetailEndpoint();
+        app.MapItemPriceEndpoint();
+        app.MapItemCostEndpoint();
+        app.MapUnitConversionEndpoint();
     }
 }

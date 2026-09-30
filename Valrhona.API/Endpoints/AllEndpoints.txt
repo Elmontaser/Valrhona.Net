@@ -1,0 +1,523 @@
+===== CategoryEndpoint.cs =====
+using Valrhona.API.Dtos.Categories;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class CategoryEndpoint
+{
+    public static void MapCategoryEndpoint(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/Categories");
+
+        group.MapGet("/", async (
+            ICategoryRepository repository) =>
+        {
+            var categories = await repository.GetAllAsync();
+
+            return Results.Ok(categories);
+        });
+
+        group.MapGet("/{id:int}", async (
+            int id,
+            ICategoryRepository repository) =>
+        {
+            var category = await repository.GetByIdAsync(id);
+
+            return category is null
+                ? Results.NotFound()
+                : Results.Ok(category);
+        });
+
+        group.MapPost("/", async (
+            CreateCategoryDto dto,
+            ICategoryRepository repository) =>
+        {
+            await repository.InsertAsync(dto);
+
+            return Results.NoContent();
+        });
+
+        group.MapPut("/{id:int}", async (
+            int id,
+            UpdateCategoryDto dto,
+            ICategoryRepository repository) =>
+        {
+            dto.CategoryId = id;
+
+            await repository.UpdateAsync(dto);
+
+            return Results.NoContent();
+        });
+
+        group.MapDelete("/{id:int}", async (
+            int id,
+            ICategoryRepository repository) =>
+        {
+            var dto = new DeleteCategoryDto
+            {
+                CategoryId = id
+            };
+
+            await repository.DeleteAsync(dto);
+
+            return Results.NoContent();
+        });
+    }
+}
+
+===== EndpointExtensions.cs =====
+using Valrhona.API.Endpoints;
+
+namespace Valrhona.API;
+
+public static class EndpointExtensions
+{
+    public static void MapEndpoints(this WebApplication app)
+    {
+        app.MapItemEndpoint();
+        app.MapCategoryEndpoint();
+        app.MapUnitEndpoint();
+        app.MapItemTypeEndpoint();
+        app.MapRecipeEndpoint();
+        app.MapRecipeDetailEndpoint();
+        app.MapItemPriceEndpoint();
+        app.MapItemCostEndpoint();
+        app.MapUnitConversionEndpoint();
+    }
+}
+
+===== ItemCostEndpoint.cs =====
+using Valrhona.API.Dtos.ItemCosts;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class ItemCostEndpoint
+{
+    public static void MapItemCostEndpoint(
+        this WebApplication app)
+    {
+        var group = app.MapGroup("/api/itemCosts");
+
+        group.MapPost("/recalculate", async (RecalculateItemCostDto dto, IItemCostRepository repository) =>
+        {
+            var costs = await repository.RecalculateAsync(dto);
+
+            return Results.Ok(costs);
+        });
+    }
+}
+
+===== ItemEndpoint.cs =====
+using Valrhona.API.Dtos.Items;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class ItemEndpoint
+{
+    public static void MapItemEndpoint(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/Items");
+
+        group.MapGet("/", async (IItemRepository repository) =>
+        {
+            var items = await repository.GetAllAsync();
+
+            return Results.Ok(items);
+        });
+
+        group.MapGet("/{id:int}", async (
+            int id,
+            IItemRepository repository) =>
+        {
+            var item = await repository.GetByIdAsync(id);
+
+            return item is null
+                ? Results.NotFound()
+                : Results.Ok(item);
+        });
+
+        group.MapPost("/", async (
+            CreateItemDto dto,
+            IItemRepository repository) =>
+        {
+            var item = await repository.InsertAsync(dto);
+
+            return item is null
+                ? Results.BadRequest()
+                : Results.Created($"/api/items/{item.ItemId}", item);
+        });
+
+        group.MapPut("/{id:int}", async (
+            int id, UpdateItemDto dto,
+            IItemRepository repository) =>
+        {
+            dto.ItemId = id;
+
+            await repository.UpdateAsync(dto);
+
+            return Results.NoContent();
+        });
+
+        group.MapDelete("/{id:int}", async (
+            int id,
+            IItemRepository repository) =>
+        {
+            var dto = new DeleteItemDto
+            {
+                ItemId = id
+            };
+
+            await repository.DeleteAsync(dto);
+
+            return Results.NoContent();
+        });
+
+        group.MapGet("/search", async ([AsParameters] SearchItemDto dto,
+            IItemRepository repository) =>
+        {
+            var items = await repository.SearchAsync(dto);
+
+            return Results.Ok(items);
+        });
+    }
+
+
+}
+
+===== ItemPriceEndpoint.cs =====
+using Valrhona.API.Dtos.ItemPrices;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class ItemPriceEndpoint
+{
+    public static void MapItemPriceEndpoint(
+        this WebApplication app)
+    {
+        var group = app.MapGroup("/api/itemPrices");
+
+
+        // تسجيل سعر جديد
+        group.MapPost("/", async (
+            SetItemPriceDto dto,
+            IItemPriceRepository repository) =>
+        {
+            var itemPrice = await repository.SetAsync(dto);
+
+            return itemPrice is null
+                ? Results.BadRequest()
+                : Results.Created(
+                    $"/api/item-prices/{itemPrice.ItemPriceId}",
+                    itemPrice);
+        });
+
+
+        // تفعيل الأسعار المستحقة
+        group.MapPost("/activate-due", async (
+            ActivateDuePricesDto dto,
+            IItemPriceRepository repository) =>
+        {
+            var prices = await repository.ActivateDuePricesAsync(dto);
+
+            return Results.Ok(prices);
+        });
+    }
+}
+
+===== ItemTypeEndpoint.cs =====
+using Valrhona.API.Dtos.ItemTypes;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class ItemTypeEndpoint
+{
+    public static void MapItemTypeEndpoint(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/itemTypes");
+
+        group.MapGet("/", async (IItemTypeRepository repository) =>
+        {
+            var itemTypes = await repository.GetAllAsync();
+
+            return Results.Ok(itemTypes);
+        });
+
+        group.MapGet("/{id:int}", async (
+            int id,
+            IItemTypeRepository repository) =>
+        {
+            var itemType = await repository.GetByIdAsync((byte)id);
+
+            return itemType is null
+                ? Results.NotFound()
+                : Results.Ok(itemType);
+        });
+
+        group.MapPost("/", async (
+            ItemTypeDto dto,
+            IItemTypeRepository repository) =>
+        {
+            var itemType = await repository.InsertAsync(dto);
+
+            return itemType is null
+                ? Results.BadRequest()
+                : Results.Created(
+                    $"/api/itemtypes/{itemType.ItemTypeId}",
+                    itemType);
+        });
+
+        group.MapPut("/{id:int}", async (
+            int id,
+            ItemTypeDto dto,
+            IItemTypeRepository repository) =>
+        {
+            dto.ItemTypeId = (byte)id;
+
+            await repository.UpdateAsync(dto);
+
+            return Results.NoContent();
+        });
+
+        group.MapDelete("/{id:int}", async (
+            int id,
+            IItemTypeRepository repository) =>
+        {
+            var dto = new ItemTypeDto
+            {
+                ItemTypeId = (byte)id
+            };
+
+            await repository.DeleteAsync(dto);
+
+            return Results.NoContent();
+        });
+    }
+}
+
+===== RecipeDetailEndpoint.cs =====
+using Valrhona.API.Dtos.RecipeDetails;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class RecipeDetailEndpoint
+{
+    public static void MapRecipeDetailEndpoint(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/recipeDetails");
+
+        group.MapGet("/{recipeId:int}", async (
+            int recipeId,
+            IRecipeDetailRepository repository) =>
+        {
+            var details =
+                await repository.GetByRecipeIdAsync(recipeId);
+
+            return Results.Ok(details);
+        });
+
+        group.MapPost("/", async (CreateRecipeDetailDto dto, IRecipeDetailRepository repository) =>
+        {
+            var recipeDetailId =
+                await repository.InsertAsync(dto);
+
+            return recipeDetailId is null
+                ? Results.BadRequest()
+                : Results.Created(
+                    $"/api/recipe-details/{recipeDetailId}",
+                    new
+                    {
+                        RecipeDetailId = recipeDetailId
+                    });
+        });
+
+        group.MapPut("/{id:long}", async (long id, UpdateRecipeDetailDto dto, IRecipeDetailRepository repository) =>
+        {
+            dto.RecipeDetailId = id;
+
+            await repository.UpdateAsync(dto);
+
+            return Results.NoContent();
+        });
+
+        group.MapDelete("/{id:long}", async (long id, IRecipeDetailRepository repository) =>
+{
+    await repository.DeleteAsync(id);
+
+    return Results.NoContent();
+});
+
+    }
+}
+
+===== RecipeEndpoint.cs =====
+using Valrhona.API.Dtos.Recipes;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class RecipeEndpoint
+{
+    public static void MapRecipeEndpoint(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/Recipes");
+
+        group.MapGet("/", async (IRecipeRepository repository) =>
+        {
+            var recipes = await repository.GetAllAsync();
+
+            return Results.Ok(recipes);
+        });
+
+        group.MapGet("/{id:int}", async (
+            int id,
+            IRecipeRepository repository) =>
+        {
+            var recipe = await repository.GetByIdAsync(id);
+
+            return recipe is null
+                ? Results.NotFound()
+                : Results.Ok(recipe);
+        });
+
+        group.MapPost("/", async (
+            CreateRecipeDto dto,
+            IRecipeRepository repository) =>
+        {
+            var recipe = await repository.InsertAsync(dto);
+
+            return recipe is null
+                ? Results.BadRequest()
+                : Results.Created(
+                    $"/api/recipes/{recipe.RecipeId}",
+                    recipe);
+        });
+
+        group.MapGet("/by-ingredient/{ingredientItemId:int}",
+            async (
+                int ingredientItemId,
+                IRecipeRepository repository) =>
+            {
+                var recipes =
+                    await repository.GetByIngredientAsync(
+                        ingredientItemId);
+
+                return Results.Ok(recipes);
+            });
+
+        group.MapPut("/{id:int}", async (
+int id,
+UpdateRecipeDto dto,
+IRecipeRepository repository) =>
+{
+    dto.RecipeId = id;
+
+    var recipe = await repository.UpdateAsync(dto);
+
+    return recipe is null
+        ? Results.NotFound()
+        : Results.Ok(recipe);
+});
+
+        group.MapDelete("/{id:int}", async (
+            int id,
+            IRecipeRepository repository) =>
+        {
+            await repository.DeactivateAsync(id);
+
+            return Results.NoContent();
+        });
+    }
+}
+
+===== UnitConversionEndpoint.cs =====
+using Valrhona.API.Dtos.UnitConversions;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class UnitConversionEndpoint
+{
+    public static void MapUnitConversionEndpoint(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/unitConversions");
+
+        group.MapPost("/convert", async (ConvertUnitDto dto, IUnitConversionRepository repository) =>
+        {
+            var result = await repository.ConvertAsync(dto);
+
+            return result is null ? Results.BadRequest() : Results.Ok(result);
+        });
+    }
+}
+
+===== UnitEndpoint.cs =====
+using Valrhona.API.Dtos.Units;
+using Valrhona.API.Interfaces;
+
+namespace Valrhona.API.Endpoints;
+
+public static class UnitEndpoint
+{
+    public static void MapUnitEndpoint(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/Units");
+
+        group.MapGet("/", async (IUnitRepository repository) =>
+        {
+            var units = await repository.GetAllAsync();
+
+            return Results.Ok(units);
+        });
+
+        group.MapGet("/{id:int}", async (
+            int id, IUnitRepository repository) =>
+        {
+            var unit = await repository.GetByIdAsync(id);
+
+            return unit is null
+                ? Results.NotFound()
+                : Results.Ok(unit);
+        });
+
+        group.MapPost("/", async (
+           CreateUnitDto dto, IUnitRepository repository) =>
+        {
+            var unit = await repository.InsertAsync(dto);
+
+            return unit is null
+                ? Results.BadRequest()
+                : Results.Created($"/api/units/{unit.UnitId}", unit);
+        });
+
+        group.MapPut("/{id:int}", async (
+            int id, UpdateUnitDto dto,
+            IUnitRepository repository) =>
+        {
+            dto.UnitId = id;
+
+            await repository.UpdateAsync(dto);
+
+            return Results.NoContent();
+        });
+
+        group.MapDelete("/{id:int}", async (
+            int id,
+            IUnitRepository repository) =>
+        {
+            var dto = new DeleteUnitDto
+            {
+                UnitId = id
+            };
+
+            await repository.DeleteAsync(dto);
+
+            return Results.NoContent();
+        });
+    }
+}

@@ -5,19 +5,22 @@ namespace Valrhona.API.Endpoints;
 
 public static class UnitEndpoint
 {
-    public static void MapUnitEndpoint(this WebApplication app)
+    public static void MapUnitEndpoint(
+        this WebApplication app)
     {
         var group = app.MapGroup("/api/units");
 
-        group.MapGet("/", async (IUnitRepository repository) =>
+        group.MapGet("/", async (
+            IUnitRepository repository) =>
         {
             var units = await repository.GetAllAsync();
 
             return Results.Ok(units);
         });
 
-        group.MapGet("/{id:int}", async (
-            int id, IUnitRepository repository) =>
+        group.MapGet("/{id:int:min(1)}", async (
+            int id,
+            IUnitRepository repository) =>
         {
             var unit = await repository.GetByIdAsync(id);
 
@@ -27,17 +30,21 @@ public static class UnitEndpoint
         });
 
         group.MapPost("/", async (
-           CreateUnitDto dto, IUnitRepository repository) =>
+            CreateUnitDto dto,
+            IUnitRepository repository) =>
         {
             var unit = await repository.InsertAsync(dto);
 
             return unit is null
                 ? Results.BadRequest()
-                : Results.Created($"/api/units/{unit.UnitId}", unit);
+                : Results.Created(
+                    $"/api/units/{unit.UnitId}",
+                    unit);
         });
 
-        group.MapPut("/{id:int}", async (
-            int id, UpdateUnitDto dto,
+        group.MapPut("/{id:int:min(1)}", async (
+            int id,
+            UpdateUnitDto dto,
             IUnitRepository repository) =>
         {
             dto.UnitId = id;
@@ -47,7 +54,7 @@ public static class UnitEndpoint
             return Results.NoContent();
         });
 
-        group.MapDelete("/{id:int}", async (
+        group.MapDelete("/{id:int:min(1)}", async (
             int id,
             IUnitRepository repository) =>
         {

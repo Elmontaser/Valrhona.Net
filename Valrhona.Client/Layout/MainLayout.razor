@@ -1,0 +1,148 @@
+﻿@inherits LayoutComponentBase
+
+<div class="d-flex min-vh-100 bg-light">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="offcanvas-lg offcanvas-end bg-dark text-white sidebar" tabindex="-1"
+           aria-labelledby="sidebarLabel">
+
+        <!-- Mobile Header -->
+        <div class="offcanvas-header d-lg-none border-bottom border-secondary">
+
+            <h5 class="offcanvas-title" id="sidebarLabel">
+                Valrhona
+            </h5>
+
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="إغلاق">
+            </button>
+
+        </div>
+
+        <!-- Sidebar Content -->
+        <div class="offcanvas-body p-0">
+
+            <NavMenu />
+
+        </div>
+
+    </aside>
+
+
+    <!-- Main Area -->
+    <div class="flex-grow-1 d-flex flex-column min-vh-100">
+
+        <!-- Header -->
+        <header class="bg-white border-bottom shadow-sm">
+
+            <div class="container-fluid px-3 px-lg-4">
+
+                <div class="d-flex align-items-center justify-content-between" style="height: 72px;">
+
+                    <!-- Right -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        <!-- Mobile Menu -->
+                        <button type="button" class="btn btn-light d-lg-none" data-bs-toggle="offcanvas"
+                                data-bs-target="#sidebar" aria-controls="sidebar" aria-label="فتح القائمة">
+
+                            <span class="fs-4">☰</span>
+
+                        </button>
+
+
+                        <div>
+
+                            <h5 class="mb-0 fw-bold">
+                                Valrhona
+                            </h5>
+
+                            <small class="text-muted">
+                                نظام إدارة المصنع
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Left -->
+                    <div class="d-flex align-items-center gap-3">
+
+                        <!-- Notifications -->
+                        <button type="button" class="btn btn-light position-relative" title="الإشعارات">
+
+                            <span class="fs-5">🔔</span>
+
+                        </button>
+
+
+                        <!-- User -->
+                        <div class="d-flex align-items-center gap-2">
+
+                            <div class="rounded-circle bg-secondary text-white
+                                d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+
+                                👤
+
+                            </div>
+
+                            <div class="d-none d-md-block text-end">
+
+                                <div class="fw-semibold small">
+                                    المستخدم
+                                </div>
+
+                                <div class="text-muted" style="font-size:11px;">
+                                    مدير النظام
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- Content -->
+        <main class="flex-grow-1">
+
+            <div class="container-fluid px-3 px-lg-4 py-4">
+
+                @Body
+
+            </div>
+
+        </main>
+
+
+        <!-- Footer -->
+        <footer class="bg-white border-top py-3">
+
+            <div class="container-fluid px-3 px-lg-4">
+
+                <div class="d-flex justify-content-between
+                    align-items-center">
+
+                    <small class="text-muted">
+                        Valrhona
+                    </small>
+
+                    <small class="text-muted">
+                        © @DateTime.Now.Year جميع الحقوق محفوظة
+                    </small>
+
+                </div>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+</div>

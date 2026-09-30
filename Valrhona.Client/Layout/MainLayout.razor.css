@@ -1,0 +1,110 @@
+/* =========================================
+   Sidebar
+   ========================================= */
+
+.sidebar {
+    width: 310px;
+    min-width: 310px;
+    background-color: #212529;
+}
+
+
+/* =========================================
+   Desktop
+   ========================================= */
+
+@media (min-width: 992px) {
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+
+        z-index: 1050;
+
+        overflow-y: auto;
+    }
+
+    .sidebar + div {
+        margin-right: 310px;
+    }
+}
+
+
+/* =========================================
+   Navigation
+   ========================================= */
+
+.nav-link {
+    padding: 10px 12px;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.14);
+
+    font-weight: 600;
+}
+
+
+/* =========================================
+   Mobile
+   ========================================= */
+
+@media (max-width: 991.98px) {
+
+    .sidebar {
+        width: 310px;
+        max-width: 85vw;
+    }
+
+
+    .sidebar .nav-link {
+        font-size: 20px !important;
+        line-height: 1.5;
+        padding: 15px 16px !important;
+        min-height: 56px;
+    }
+
+
+    .sidebar nav small {
+        font-size: 15px !important;
+        line-height: 1.5;
+    }
+
+
+    .sidebar .nav-link span {
+        font-size: 22px;
+        display: inline-block;
+        min-width: 30px;
+    }
+
+
+    .sidebar .fw-bold {
+        font-size: 21px !important;
+    }
+
+
+    .sidebar .text-secondary {
+        font-size: 14px;
+    }
+
+
+    .sidebar .small {
+        font-size: 15px !important;
+    }
+
+
+    .sidebar .btn {
+        font-size: 17px !important;
+        padding: 11px !important;
+    }
+}

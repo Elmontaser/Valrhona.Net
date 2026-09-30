@@ -1,0 +1,335 @@
+﻿@page "/items"
+
+<PageTitle>الأصناف - Valrhona</PageTitle>
+
+<div class="container-fluid">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row
+        justify-content-between
+        align-items-md-center
+        gap-3 mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                الأصناف
+            </h2>
+
+            <p class="text-muted mb-0">
+                إدارة أصناف ومنتجات المصنع
+            </p>
+        </div>
+
+        <button type="button" class="btn btn-dark px-4">
+
+            <span class="me-2">＋</span>
+            إضافة صنف
+
+        </button>
+
+    </div>
+
+
+    <!-- Search & Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- Search -->
+                <div class="col-12 col-lg-5">
+
+                    <label class="form-label fw-semibold">
+                        بحث
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            🔍
+                        </span>
+
+                        <input type="text" class="form-control" placeholder="ابحث بالكود أو اسم الصنف..." />
+
+                    </div>
+
+                </div>
+
+
+                <!-- Type -->
+                <div class="col-12 col-md-4 col-lg-3">
+
+                    <label class="form-label fw-semibold">
+                        نوع الصنف
+                    </label>
+
+                    <select class="form-select">
+
+                        <option value="">
+                            جميع الأنواع
+                        </option>
+
+                        <option value="1">
+                            مادة خام
+                        </option>
+
+                        <option value="2">
+                            منتج نصف مصنع
+                        </option>
+
+                        <option value="3">
+                            منتج نهائي
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Status -->
+                <div class="col-12 col-md-4 col-lg-2">
+
+                    <label class="form-label fw-semibold">
+                        الحالة
+                    </label>
+
+                    <select class="form-select">
+
+                        <option value="">
+                            الكل
+                        </option>
+
+                        <option value="true">
+                            نشط
+                        </option>
+
+                        <option value="false">
+                            غير نشط
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Reset -->
+                <div class="col-12 col-md-4 col-lg-2">
+
+                    <button type="button" class="btn btn-outline-secondary w-100">
+
+                        إعادة ضبط
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Items Table -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th class="px-4">
+                                #
+                            </th>
+
+                            <th>
+                                كود الصنف
+                            </th>
+
+                            <th>
+                                اسم الصنف
+                            </th>
+
+                            <th>
+                                النوع
+                            </th>
+
+                            <th>
+                                الوحدة
+                            </th>
+
+                            <th>
+                                الحالة
+                            </th>
+
+                            <th class="text-center">
+                                الإجراءات
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td class="px-4">
+                                1
+                            </td>
+
+                            <td>
+                                <span class="fw-semibold">
+                                    SFG-FL-001
+                                </span>
+                            </td>
+
+                            <td>
+                                فيوتين
+                            </td>
+
+                            <td>
+                                منتج نصف مصنع
+                            </td>
+
+                            <td>
+                                كجم
+                            </td>
+
+                            <td>
+
+                                <span class="badge text-bg-success">
+                                    نشط
+                                </span>
+
+                            </td>
+
+                            <td class="text-center">
+
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل">
+
+                                    ✏️
+
+                                </button>
+
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="حذف">
+
+                                    🗑️
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td class="px-4">
+                                2
+                            </td>
+
+                            <td>
+                                <span class="fw-semibold">
+                                    RM-FL-001
+                                </span>
+                            </td>
+
+                            <td>
+                                دقيق
+                            </td>
+
+                            <td>
+                                مادة خام
+                            </td>
+
+                            <td>
+                                كجم
+                            </td>
+
+                            <td>
+
+                                <span class="badge text-bg-success">
+                                    نشط
+                                </span>
+
+                            </td>
+
+                            <td class="text-center">
+
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل">
+
+                                    ✏️
+
+                                </button>
+
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="حذف">
+
+                                    🗑️
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pagination -->
+        <div class="card-footer bg-white">
+
+            <div class="d-flex flex-column flex-md-row
+                justify-content-between
+                align-items-center
+                gap-2">
+
+                <small class="text-muted">
+                    عرض 1 - 2 من 2 صنف
+                </small>
+
+                <nav>
+
+                    <ul class="pagination pagination-sm mb-0">
+
+                        <li class="page-item disabled">
+                            <button class="page-link">
+                                السابق
+                            </button>
+                        </li>
+
+                        <li class="page-item active">
+                            <button class="page-link">
+                                1
+                            </button>
+                        </li>
+
+                        <li class="page-item disabled">
+                            <button class="page-link">
+                                التالي
+                            </button>
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

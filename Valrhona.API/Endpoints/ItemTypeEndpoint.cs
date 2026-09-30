@@ -5,18 +5,20 @@ namespace Valrhona.API.Endpoints;
 
 public static class ItemTypeEndpoint
 {
-    public static void MapItemTypeEndpoint(this WebApplication app)
+    public static void MapItemTypeEndpoint(
+        this WebApplication app)
     {
-        var group = app.MapGroup("/api/itemtypes");
+        var group = app.MapGroup("/api/item-types");
 
-        group.MapGet("/", async (IItemTypeRepository repository) =>
+        group.MapGet("/", async (
+            IItemTypeRepository repository) =>
         {
             var itemTypes = await repository.GetAllAsync();
 
             return Results.Ok(itemTypes);
         });
 
-        group.MapGet("/{id:int}", async (
+        group.MapGet("/{id:int:min(1):max(255)}", async (
             int id,
             IItemTypeRepository repository) =>
         {
@@ -36,11 +38,11 @@ public static class ItemTypeEndpoint
             return itemType is null
                 ? Results.BadRequest()
                 : Results.Created(
-                    $"/api/itemtypes/{itemType.ItemTypeId}",
+                    $"/api/item-types/{itemType.ItemTypeId}",
                     itemType);
         });
 
-        group.MapPut("/{id:int}", async (
+        group.MapPut("/{id:int:min(1):max(255)}", async (
             int id,
             ItemTypeDto dto,
             IItemTypeRepository repository) =>
@@ -52,7 +54,7 @@ public static class ItemTypeEndpoint
             return Results.NoContent();
         });
 
-        group.MapDelete("/{id:int}", async (
+        group.MapDelete("/{id:int:min(1):max(255)}", async (
             int id,
             IItemTypeRepository repository) =>
         {

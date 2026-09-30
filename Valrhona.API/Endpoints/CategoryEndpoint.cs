@@ -5,7 +5,8 @@ namespace Valrhona.API.Endpoints;
 
 public static class CategoryEndpoint
 {
-    public static void MapCategoryEndpoint(this WebApplication app)
+    public static void MapCategoryEndpoint(
+        this WebApplication app)
     {
         var group = app.MapGroup("/api/categories");
 
@@ -17,7 +18,7 @@ public static class CategoryEndpoint
             return Results.Ok(categories);
         });
 
-        group.MapGet("/{id:int}", async (
+        group.MapGet("/{id:int:min(1)}", async (
             int id,
             ICategoryRepository repository) =>
         {
@@ -37,7 +38,7 @@ public static class CategoryEndpoint
             return Results.NoContent();
         });
 
-        group.MapPut("/{id:int}", async (
+        group.MapPut("/{id:int:min(1)}", async (
             int id,
             UpdateCategoryDto dto,
             ICategoryRepository repository) =>
@@ -49,7 +50,7 @@ public static class CategoryEndpoint
             return Results.NoContent();
         });
 
-        group.MapDelete("/{id:int}", async (
+        group.MapDelete("/{id:int:min(1)}", async (
             int id,
             ICategoryRepository repository) =>
         {

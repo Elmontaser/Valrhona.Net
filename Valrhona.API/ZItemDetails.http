@@ -1,0 +1,49 @@
+@Valrhona.API_HostAddress = http://localhost:5103/api
+
+### Set Item Price
+POST {{Valrhona.API_HostAddress}}/item-prices/
+Content-Type: application/json
+
+{
+  "itemId": 3,
+  "price": 3.7500,
+  "unitId": 1,
+  "currency": "LYD",
+  "effectiveDate": "2026-09-29",
+  "notes": "اختبار سعر الدقيق من API"
+}
+
+
+### Set Price for Feuilletine
+POST {{Valrhona.API_HostAddress}}/item-prices/
+Content-Type: application/json
+
+{
+  "itemId": 9,
+  "price": 25.0000,
+  "unitId": 1,
+  "currency": "LYD",
+  "effectiveDate": "2026-09-29",
+  "notes": "اختبار سعر الفيوتين"
+}
+
+### ItemPrice_Set
+POST {{Valrhona.API_HostAddress}}/item-prices/
+Content-Type: application/json
+
+{
+  "itemId": 12,
+  "price": 25.0000,
+  "unitId": 1,
+  "currency": "LYD",
+  "effectiveDate": "2026-09-29",
+  "notes": "اختبار"
+}
+
+###
+POST {{Valrhona.API_HostAddress}}/item-prices/activate-due
+Content-Type: application/json
+
+{
+  "asOfDate": "2026-09-30"
+}

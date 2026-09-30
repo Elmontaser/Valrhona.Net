@@ -5,18 +5,20 @@ namespace Valrhona.API.Endpoints;
 
 public static class ItemEndpoint
 {
-    public static void MapItemEndpoint(this WebApplication app)
+    public static void MapItemEndpoint(
+        this WebApplication app)
     {
         var group = app.MapGroup("/api/items");
 
-        group.MapGet("/", async (IItemRepository repository) =>
+        group.MapGet("/", async (
+            IItemRepository repository) =>
         {
             var items = await repository.GetAllAsync();
 
             return Results.Ok(items);
         });
 
-        group.MapGet("/{id:int}", async (
+        group.MapGet("/{id:int:min(1)}", async (
             int id,
             IItemRepository repository) =>
         {
@@ -35,11 +37,14 @@ public static class ItemEndpoint
 
             return item is null
                 ? Results.BadRequest()
-                : Results.Created($"/api/items/{item.ItemId}", item);
+                : Results.Created(
+                    $"/api/items/{item.ItemId}",
+                    item);
         });
 
-        group.MapPut("/{id:int}", async (
-            int id, UpdateItemDto dto,
+        group.MapPut("/{id:int:min(1)}", async (
+            int id,
+            UpdateItemDto dto,
             IItemRepository repository) =>
         {
             dto.ItemId = id;
@@ -49,7 +54,7 @@ public static class ItemEndpoint
             return Results.NoContent();
         });
 
-        group.MapDelete("/{id:int}", async (
+        group.MapDelete("/{id:int:min(1)}", async (
             int id,
             IItemRepository repository) =>
         {
@@ -63,7 +68,8 @@ public static class ItemEndpoint
             return Results.NoContent();
         });
 
-        group.MapGet("/search", async ([AsParameters] SearchItemDto dto,
+        group.MapGet("/search", async (
+            [AsParameters] SearchItemDto dto,
             IItemRepository repository) =>
         {
             var items = await repository.SearchAsync(dto);
@@ -71,6 +77,4 @@ public static class ItemEndpoint
             return Results.Ok(items);
         });
     }
-
-
 }

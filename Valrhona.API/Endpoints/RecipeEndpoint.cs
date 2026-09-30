@@ -5,18 +5,20 @@ namespace Valrhona.API.Endpoints;
 
 public static class RecipeEndpoint
 {
-    public static void MapRecipeEndpoint(this WebApplication app)
+    public static void MapRecipeEndpoint(
+        this WebApplication app)
     {
         var group = app.MapGroup("/api/recipes");
 
-        group.MapGet("/", async (IRecipeRepository repository) =>
+        group.MapGet("/", async (
+            IRecipeRepository repository) =>
         {
             var recipes = await repository.GetAllAsync();
 
             return Results.Ok(recipes);
         });
 
-        group.MapGet("/{id:int}", async (
+        group.MapGet("/{id:int:min(1)}", async (
             int id,
             IRecipeRepository repository) =>
         {
@@ -40,7 +42,8 @@ public static class RecipeEndpoint
                     recipe);
         });
 
-        group.MapGet("/by-ingredient/{ingredientItemId:int}",
+        group.MapGet(
+            "/by-ingredient/{ingredientItemId:int:min(1)}",
             async (
                 int ingredientItemId,
                 IRecipeRepository repository) =>
@@ -52,21 +55,21 @@ public static class RecipeEndpoint
                 return Results.Ok(recipes);
             });
 
-        group.MapPut("/{id:int}", async (
-int id,
-UpdateRecipeDto dto,
-IRecipeRepository repository) =>
-{
-    dto.RecipeId = id;
+        group.MapPut("/{id:int:min(1)}", async (
+            int id,
+            UpdateRecipeDto dto,
+            IRecipeRepository repository) =>
+        {
+            dto.RecipeId = id;
 
-    var recipe = await repository.UpdateAsync(dto);
+            var recipe = await repository.UpdateAsync(dto);
 
-    return recipe is null
-        ? Results.NotFound()
-        : Results.Ok(recipe);
-});
+            return recipe is null
+                ? Results.NotFound()
+                : Results.Ok(recipe);
+        });
 
-        group.MapDelete("/{id:int}", async (
+        group.MapDelete("/{id:int:min(1)}", async (
             int id,
             IRecipeRepository repository) =>
         {

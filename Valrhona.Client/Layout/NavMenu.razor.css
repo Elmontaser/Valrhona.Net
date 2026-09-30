@@ -1,0 +1,279 @@
+
+/* =========================================================
+   VALRHONA SIDEBAR
+   ========================================================= */
+
+.sidebar-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.sidebar-brand {
+    height: 76px;
+    min-height: 76px;
+
+    padding: 0 22px;
+
+    display: flex;
+    align-items: center;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+.brand-logo {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffffff;
+    color: #17202a;
+
+    font-size: 22px;
+    font-weight: 800;
+}
+
+
+.brand-text {
+    margin-right: 12px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.brand-text strong {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+
+.brand-text small {
+    margin-top: 2px;
+
+    color: rgba(255, 255, 255, 0.45);
+
+    font-size: 9px;
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.sidebar-navigation {
+    flex: 1;
+
+    padding: 18px 12px;
+
+    overflow-y: auto;
+}
+
+
+.menu-section-title {
+    padding: 14px 13px 8px;
+
+    color: rgba(255, 255, 255, 0.38);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.4px;
+}
+
+
+/* =========================================================
+   NAV LINKS
+   ========================================================= */
+
+.sidebar-link {
+    min-height: 46px;
+
+    margin-bottom: 4px;
+    padding: 0 13px;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+
+    color: rgba(255, 255, 255, 0.68);
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.sidebar-link:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.07);
+
+    transform: translateX(-2px);
+}
+
+
+.sidebar-link.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+
+    font-weight: 600;
+}
+
+
+.sidebar-icon {
+    width: 28px;
+
+    margin-left: 10px;
+
+    text-align: center;
+
+    font-size: 16px;
+}
+
+
+.sidebar-link-text {
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   BOTTOM AREA
+   ========================================================= */
+
+.sidebar-bottom {
+    padding: 14px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+/* User */
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+
+.sidebar-user-avatar {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.1);
+
+    color: #ffffff;
+
+    font-size: 15px;
+}
+
+
+.sidebar-user-info {
+    margin-right: 9px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.sidebar-user-info strong {
+    color: #ffffff;
+    font-size: 12px;
+}
+
+
+.sidebar-user-info span {
+    margin-top: 2px;
+
+    color: rgba(255, 255, 255, 0.4);
+
+    font-size: 10px;
+}
+
+
+/* Logout */
+
+.logout-button {
+    width: 100%;
+    height: 40px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 10px;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    transition: all 0.2s ease;
+}
+
+
+.logout-button:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+
+.logout-button span:first-child {
+    width: 28px;
+    text-align: center;
+    margin-left: 10px;
+}
+
+
+.logout-button span:last-child {
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.sidebar-navigation::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-navigation::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+}
+

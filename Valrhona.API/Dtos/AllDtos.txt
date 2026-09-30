@@ -1,0 +1,333 @@
+===== Categories/CreateCategoryDto.cs =====
+namespace Valrhona.API.Dtos.Categories;
+
+public class CreateCategoryDto
+{
+    public string CategoryName { get; set; } = string.Empty;
+    public int? ParentCategoryId { get; set; }
+}
+
+===== Categories/DeleteCategoryDto.cs =====
+namespace Valrhona.API.Dtos.Categories;
+
+public class DeleteCategoryDto
+{
+    public int CategoryId { get; set; }
+}
+
+===== Categories/UpdateCategoryDto.cs =====
+namespace Valrhona.API.Dtos.Categories;
+
+public class UpdateCategoryDto
+{
+    public int CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public int? ParentCategoryId { get; set; }
+}
+
+===== ItemCosts/RecalculateItemCostDto.cs =====
+namespace Valrhona.API.Dtos.ItemCosts;
+
+public class RecalculateItemCostDto
+{
+    public int ItemId { get; set; }
+
+    public DateTime? AsOfDate { get; set; }
+}
+
+===== ItemPrices/ActivateDuePricesDto.cs =====
+namespace Valrhona.API.Dtos.ItemPrices;
+
+public class ActivateDuePricesDto
+{
+    public DateTime? AsOfDate { get; set; }
+}
+
+===== ItemPrices/SetItemPriceDto.cs =====
+using System.ComponentModel.DataAnnotations;
+
+namespace Valrhona.API.Dtos.ItemPrices;
+
+public class SetItemPriceDto
+{
+    [Range(1, int.MaxValue, ErrorMessage = "ItemId يجب أن يكون أكبر من صفر.")]
+    public int ItemId { get; set; }
+
+    [Range(0, double.MaxValue, ErrorMessage = "السعر لا يمكن أن يكون سالبًا.")]
+    public decimal Price { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "UnitId يجب أن يكون أكبر من صفر.")]
+    public int UnitId { get; set; }
+
+    [Required(ErrorMessage = "العملة مطلوبة.")]
+    [StringLength(10, ErrorMessage = "العملة لا يمكن أن تتجاوز 10 أحرف.")]
+    public string Currency { get; set; } = "LYD";
+
+    public DateTime? EffectiveDate { get; set; }
+
+    [StringLength(500, ErrorMessage = "الملاحظات لا يمكن أن تتجاوز 500 حرف.")]
+    public string? Notes { get; set; }
+}
+
+===== Items/CreateItemDto.cs =====
+namespace Valrhona.API.Dtos.Items;
+
+public class CreateItemDto
+{
+    public string ItemCode { get; set; } = string.Empty;
+
+    public string ItemName { get; set; } = string.Empty;
+
+    public byte ItemTypeId { get; set; }
+
+    public int CategoryId { get; set; }
+
+    public int UnitId { get; set; }
+
+    public string? Notes { get; set; }
+}
+
+===== Items/DeleteItemDto.cs =====
+using System;
+
+namespace Valrhona.API.Dtos.Items;
+
+public class DeleteItemDto
+{
+    public int ItemId { get; set; }
+}
+
+===== Items/SearchItemDto.cs =====
+namespace Valrhona.API.Dtos.Items;
+
+public class SearchItemDto
+{
+    public string? Search { get; set; }
+    public byte? ItemTypeId { get; set; }
+    public int? CategoryId { get; set; }
+}
+
+===== Items/UpdateItemDto.cs =====
+namespace Valrhona.API.Dtos.Items;
+
+public class UpdateItemDto
+{
+    public int ItemId { get; set; }
+
+    public string ItemCode { get; set; } = string.Empty;
+
+    public string ItemName { get; set; } = string.Empty;
+
+    public byte ItemTypeId { get; set; }
+
+    public int CategoryId { get; set; }
+
+    public int UnitId { get; set; }
+
+    public string? Notes { get; set; }
+}
+
+===== ItemTypes/ItemTypeDto.cs =====
+namespace Valrhona.API.Dtos.ItemTypes;
+
+public class ItemTypeDto
+{
+    public byte ItemTypeId { get; set; }
+
+    public string TypeName { get; set; } = string.Empty;
+
+    public bool IsActive { get; set; }
+}
+
+===== RecipeDetails/CreateRecipeDetailDto.cs =====
+namespace Valrhona.API.Dtos.RecipeDetails;
+
+public class CreateRecipeDetailDto
+{
+    public int RecipeId { get; set; }
+    public int IngredientItemId { get; set; }
+    public decimal Quantity { get; set; }
+    public int UnitId { get; set; }
+    public int SequenceNo { get; set; } = 1;
+    public decimal WastePercent { get; set; } = 0;
+    public string? Notes { get; set; }
+}
+
+===== RecipeDetails/UpdateRecipeDetailDto.cs =====
+namespace Valrhona.API.Dtos.RecipeDetails;
+
+public class UpdateRecipeDetailDto
+{
+    public long RecipeDetailId { get; set; }
+    public int IngredientItemId { get; set; }
+    public decimal Quantity { get; set; }
+    public int UnitId { get; set; }
+    public int SequenceNo { get; set; }
+    public decimal WastePercent { get; set; }
+    public string? Notes { get; set; }
+}
+
+===== Recipes/CreateRecipeDto.cs =====
+using System.ComponentModel.DataAnnotations;
+
+namespace Valrhona.API.Dtos.Recipes;
+
+public class CreateRecipeDto
+{
+    [Required(ErrorMessage = "RecipeCode مطلوب.")]
+    [StringLength(50, ErrorMessage = "RecipeCode لا يمكن أن يتجاوز 50 حرفًا.")]
+    public string RecipeCode { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "RecipeName مطلوب.")]
+    [StringLength(200, ErrorMessage = "RecipeName لا يمكن أن يتجاوز 200 حرف.")]
+    public string RecipeName { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue, ErrorMessage = "OutputItemId يجب أن يكون أكبر من صفر.")]
+    public int OutputItemId { get; set; }
+
+    [Range(typeof(decimal), "0.0001", "79228162514264337593543950335",
+        ErrorMessage = "OutputQuantity يجب أن تكون أكبر من صفر.")]
+    public decimal OutputQuantity { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "OutputUnitId يجب أن يكون أكبر من صفر.")]
+    public int OutputUnitId { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "VersionNo يجب أن يكون أكبر من صفر.")]
+    public int VersionNo { get; set; }
+
+    [StringLength(1000, ErrorMessage = "Notes لا يمكن أن تتجاوز 1000 حرف.")]
+    public string? Notes { get; set; }
+
+    [Required(ErrorMessage = "Ingredients مطلوبة.")]
+    [MinLength(1, ErrorMessage = "يجب إضافة مكوّن واحد على الأقل.")]
+    public List<RecipeIngredientDto> Ingredients { get; set; } = [];
+}
+
+===== Recipes/RecipeIngredientDto.cs =====
+using System.ComponentModel.DataAnnotations;
+
+namespace Valrhona.API.Dtos.Recipes;
+
+public class RecipeIngredientDto
+{
+    [Range(1, int.MaxValue,
+        ErrorMessage = "IngredientItemId يجب أن يكون أكبر من صفر.")]
+    public int IngredientItemId { get; set; }
+
+    [Range(typeof(decimal), "0.0001",
+        "79228162514264337593543950335",
+        ErrorMessage = "Quantity يجب أن تكون أكبر من صفر.")]
+    public decimal Quantity { get; set; }
+
+    [Range(1, int.MaxValue,
+        ErrorMessage = "UnitId يجب أن يكون أكبر من صفر.")]
+    public int UnitId { get; set; }
+
+    [Range(1, int.MaxValue,
+        ErrorMessage = "SequenceNo يجب أن يكون أكبر من صفر.")]
+    public int SequenceNo { get; set; }
+
+    [Range(typeof(decimal), "0", "100",
+        ErrorMessage = "WastePercent يجب أن تكون بين 0 و100.")]
+    public decimal WastePercent { get; set; }
+
+    [StringLength(500,
+        ErrorMessage = "Notes لا يمكن أن تتجاوز 500 حرف.")]
+    public string? Notes { get; set; }
+}
+
+===== Recipes/UpdateRecipeDto.cs =====
+using System.ComponentModel.DataAnnotations;
+
+namespace Valrhona.API.Dtos.Recipes;
+
+public class UpdateRecipeDto
+{
+    [Range(1, int.MaxValue,
+        ErrorMessage = "RecipeId يجب أن يكون أكبر من صفر.")]
+    public int RecipeId { get; set; }
+
+    [Required(ErrorMessage = "RecipeCode مطلوب.")]
+    [StringLength(50,
+        ErrorMessage = "RecipeCode لا يمكن أن يتجاوز 50 حرفًا.")]
+    public string RecipeCode { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "RecipeName مطلوب.")]
+    [StringLength(200,
+        ErrorMessage = "RecipeName لا يمكن أن يتجاوز 200 حرف.")]
+    public string RecipeName { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue,
+        ErrorMessage = "OutputItemId يجب أن يكون أكبر من صفر.")]
+    public int OutputItemId { get; set; }
+
+    [Range(typeof(decimal), "0.0001",
+        "79228162514264337593543950335",
+        ErrorMessage = "OutputQuantity يجب أن تكون أكبر من صفر.")]
+    public decimal OutputQuantity { get; set; }
+
+    [Range(1, int.MaxValue,
+        ErrorMessage = "OutputUnitId يجب أن يكون أكبر من صفر.")]
+    public int OutputUnitId { get; set; }
+
+    [Range(1, int.MaxValue,
+        ErrorMessage = "VersionNo يجب أن يكون أكبر من صفر.")]
+    public int VersionNo { get; set; }
+
+    [StringLength(1000,
+        ErrorMessage = "Notes لا يمكن أن تتجاوز 1000 حرف.")]
+    public string? Notes { get; set; }
+
+    [Required(ErrorMessage = "Ingredients مطلوبة.")]
+    [MinLength(1,
+        ErrorMessage = "يجب إضافة مكوّن واحد على الأقل.")]
+    public List<RecipeIngredientDto> Ingredients { get; set; } = [];
+}
+
+===== UnitConversions/ConvertUnitDto.cs =====
+namespace Valrhona.API.Dtos.UnitConversions;
+
+public class ConvertUnitDto
+{
+    public decimal Quantity { get; set; }
+
+    public int FromUnitId { get; set; }
+
+    public int ToUnitId { get; set; }
+}
+
+===== Units/CreateUnitDto.cs =====
+namespace Valrhona.API.Dtos.Units;
+
+public class CreateUnitDto
+{
+
+    public string UnitName { get; set; } = string.Empty;
+
+    public string? Symbol { get; set; }
+
+
+}
+
+===== Units/DeleteUnitDto.cs =====
+
+namespace Valrhona.API.Dtos.Units;
+
+public class DeleteUnitDto
+{
+    public int UnitId { get; set; }
+}
+
+===== Units/UpdateUnitDto.cs =====
+
+namespace Valrhona.API.Dtos.Units;
+
+public class UpdateUnitDto
+{
+    public int UnitId { get; set; }
+
+    public string UnitName { get; set; } = string.Empty;
+
+    public string? Symbol { get; set; }
+
+}

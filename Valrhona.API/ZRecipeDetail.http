@@ -1,0 +1,37 @@
+@Valrhona.API_HostAddress = http://localhost:5103/api
+
+GET {{Valrhona.API_HostAddress}}/recipe-details/1
+Accept: application/json
+
+
+###
+POST {{Valrhona.API_HostAddress}}/recipe-details
+Content-Type: application/json
+
+{
+  "recipeId": 1,
+  "ingredientItemId": 3,
+  "quantity": 0.2500,
+  "unitId": 1,
+  "sequenceNo": 7,
+  "wastePercent": 0,
+  "notes": "اختبار إضافة مكون من API"
+}
+
+###
+PUT {{Valrhona.API_HostAddress}}/recipe-details/33
+Content-Type: application/json
+
+{
+  "recipeDetailId": 33,
+  "ingredientItemId": 5,
+  "quantity": 0.3000,
+  "unitId": 1,
+  "sequenceNo": 7,
+  "wastePercent": 2.50,
+  "notes": "تم تعديل المكون من API"
+}
+
+
+###
+DELETE {{Valrhona.API_HostAddress}}/recipe-details/33
