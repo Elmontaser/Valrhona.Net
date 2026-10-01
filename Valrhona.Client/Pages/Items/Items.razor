@@ -1,4 +1,7 @@
 ﻿@page "/items"
+@using Valrhona.Client.Models.Items
+@using Valrhona.Client.Services.Items
+@inject ItemService ItemService
 
 <PageTitle>الأصناف - Valrhona</PageTitle>
 
@@ -21,10 +24,8 @@
         </div>
 
         <button type="button" class="btn btn-dark px-4">
-
             <span class="me-2">＋</span>
             إضافة صنف
-
         </button>
 
     </div>
@@ -50,7 +51,8 @@
                             🔍
                         </span>
 
-                        <input type="text" class="form-control" placeholder="ابحث بالكود أو اسم الصنف..." />
+                        <input type="text" class="form-control" placeholder="ابحث بالكود أو اسم الصنف..."
+                               @bind="searchText" @bind:event="oninput" />
 
                     </div>
 
@@ -64,7 +66,7 @@
                         نوع الصنف
                     </label>
 
-                    <select class="form-select">
+                    <select class="form-select" @bind="selectedType">
 
                         <option value="">
                             جميع الأنواع
@@ -94,7 +96,7 @@
                         الحالة
                     </label>
 
-                    <select class="form-select">
+                    <select class="form-select" @bind="selectedStatus">
 
                         <option value="">
                             الكل
@@ -116,7 +118,7 @@
                 <!-- Reset -->
                 <div class="col-12 col-md-4 col-lg-2">
 
-                    <button type="button" class="btn btn-outline-secondary w-100">
+                    <button type="button" class="btn btn-outline-secondary w-100" @onclick="ResetFilters">
 
                         إعادة ضبط
 
@@ -131,205 +133,303 @@
     </div>
 
 
-    <!-- Items Table -->
-    <div class="card border-0 shadow-sm">
+    @if (isLoading)
+    {
+        <div class="card border-0 shadow-sm">
 
-        <div class="card-body p-0">
+            <div class="card-body text-center py-5">
 
-            <div class="table-responsive">
+                <div class="spinner-border text-dark" role="status">
 
-                <table class="table table-hover align-middle mb-0">
+                    <span class="visually-hidden">
+                        جاري التحميل...
+                    </span>
 
-                    <thead class="table-light">
+                </div>
 
-                        <tr>
-
-                            <th class="px-4">
-                                #
-                            </th>
-
-                            <th>
-                                كود الصنف
-                            </th>
-
-                            <th>
-                                اسم الصنف
-                            </th>
-
-                            <th>
-                                النوع
-                            </th>
-
-                            <th>
-                                الوحدة
-                            </th>
-
-                            <th>
-                                الحالة
-                            </th>
-
-                            <th class="text-center">
-                                الإجراءات
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-
-                            <td class="px-4">
-                                1
-                            </td>
-
-                            <td>
-                                <span class="fw-semibold">
-                                    SFG-FL-001
-                                </span>
-                            </td>
-
-                            <td>
-                                فيوتين
-                            </td>
-
-                            <td>
-                                منتج نصف مصنع
-                            </td>
-
-                            <td>
-                                كجم
-                            </td>
-
-                            <td>
-
-                                <span class="badge text-bg-success">
-                                    نشط
-                                </span>
-
-                            </td>
-
-                            <td class="text-center">
-
-                                <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل">
-
-                                    ✏️
-
-                                </button>
-
-                                <button type="button" class="btn btn-sm btn-outline-danger" title="حذف">
-
-                                    🗑️
-
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-
-                        <tr>
-
-                            <td class="px-4">
-                                2
-                            </td>
-
-                            <td>
-                                <span class="fw-semibold">
-                                    RM-FL-001
-                                </span>
-                            </td>
-
-                            <td>
-                                دقيق
-                            </td>
-
-                            <td>
-                                مادة خام
-                            </td>
-
-                            <td>
-                                كجم
-                            </td>
-
-                            <td>
-
-                                <span class="badge text-bg-success">
-                                    نشط
-                                </span>
-
-                            </td>
-
-                            <td class="text-center">
-
-                                <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل">
-
-                                    ✏️
-
-                                </button>
-
-                                <button type="button" class="btn btn-sm btn-outline-danger" title="حذف">
-
-                                    🗑️
-
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
+                <div class="mt-3 text-muted">
+                    جاري تحميل الأصناف...
+                </div>
 
             </div>
 
         </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger shadow-sm">
+
+            <strong>
+                حدث خطأ أثناء تحميل الأصناف
+            </strong>
+
+            <div class="mt-1">
+                @errorMessage
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="px-4">
+                                    #
+                                </th>
+
+                                <th>
+                                    كود الصنف
+                                </th>
+
+                                <th>
+                                    اسم الصنف
+                                </th>
+
+                                <th>
+                                    النوع
+                                </th>
+
+                                <th>
+                                    الوحدة
+                                </th>
+
+                                <th>
+                                    الحالة
+                                </th>
+
+                                <th class="text-center">
+                                    الإجراءات
+                                </th>
+
+                            </tr>
+
+                        </thead>
 
 
-        <!-- Pagination -->
-        <div class="card-footer bg-white">
+                        <tbody>
 
-            <div class="d-flex flex-column flex-md-row
-                justify-content-between
-                align-items-center
-                gap-2">
+                            @if (!FilteredItems.Any())
+                            {
+                                <tr>
 
-                <small class="text-muted">
-                    عرض 1 - 2 من 2 صنف
-                </small>
+                                    <td colspan="7" class="text-center py-5 text-muted">
 
-                <nav>
+                                        لا توجد أصناف مطابقة للبحث.
 
-                    <ul class="pagination pagination-sm mb-0">
+                                    </td>
 
-                        <li class="page-item disabled">
-                            <button class="page-link">
-                                السابق
-                            </button>
-                        </li>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var item in FilteredItems)
+                                {
+                                    <tr>
 
-                        <li class="page-item active">
-                            <button class="page-link">
-                                1
-                            </button>
-                        </li>
+                                        <td class="px-4">
+                                            @item.ItemId
+                                        </td>
 
-                        <li class="page-item disabled">
-                            <button class="page-link">
-                                التالي
-                            </button>
-                        </li>
+                                        <td>
+                                            <span class="fw-semibold">
+                                                @item.ItemCode
+                                            </span>
+                                        </td>
 
-                    </ul>
+                                        <td>
+                                            @item.ItemName
+                                        </td>
 
-                </nav>
+                                        <td>
+                                            @GetItemTypeName(item.ItemTypeId)
+                                        </td>
+
+                                        <td>
+                                            @GetUnitName(item.UnitId)
+                                        </td>
+
+                                        <td>
+
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="badge text-bg-success">
+                                                    نشط
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge text-bg-secondary">
+                                                    غير نشط
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                        <td class="text-center">
+
+                                            <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل">
+
+                                                ✏️
+
+                                            </button>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="حذف">
+
+                                                🗑️
+
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- Pagination -->
+            <div class="card-footer bg-white">
+
+                <div class="d-flex flex-column flex-md-row
+                    justify-content-between
+                    align-items-center
+                    gap-2">
+
+                    <small class="text-muted">
+
+                        عرض @FilteredItems.Count() من @items.Count صنف
+
+                    </small>
+
+                </div>
 
             </div>
 
         </div>
-
-    </div>
+    }
 
 </div>
+
+
+@code {
+
+    private List<ItemDto> items = new();
+
+    private bool isLoading = true;
+
+    private string? errorMessage;
+
+    private string searchText = string.Empty;
+
+    private string selectedType = string.Empty;
+
+    private string selectedStatus = string.Empty;
+
+
+    private IEnumerable<ItemDto> FilteredItems
+    {
+        get
+        {
+            IEnumerable<ItemDto> result = items;
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var search = searchText.Trim();
+
+                result = result.Where(x =>
+                    x.ItemCode.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    x.ItemName.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(selectedType) &&
+                int.TryParse(selectedType, out var typeId))
+            {
+                result = result.Where(x =>
+                    x.ItemTypeId == typeId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(selectedStatus) &&
+                bool.TryParse(selectedStatus, out var status))
+            {
+                result = result.Where(x =>
+                    x.IsActive == status);
+            }
+
+            return result;
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadItemsAsync();
+    }
+
+
+    private async Task LoadItemsAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            items = await ItemService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    private void ResetFilters()
+    {
+        searchText = string.Empty;
+        selectedType = string.Empty;
+        selectedStatus = string.Empty;
+    }
+
+
+    private static string GetItemTypeName(int itemTypeId)
+    {
+        return itemTypeId switch
+        {
+            1 => "مادة خام",
+            2 => "منتج نصف مصنع",
+            3 => "منتج نهائي",
+            _ => $"نوع {itemTypeId}"
+        };
+    }
+
+
+    private static string GetUnitName(int unitId)
+    {
+        return unitId switch
+        {
+            1 => "كجم",
+            _ => $"وحدة {unitId}"
+        };
+    }
+
+}
