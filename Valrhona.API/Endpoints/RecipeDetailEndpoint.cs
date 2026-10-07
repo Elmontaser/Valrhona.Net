@@ -8,7 +8,7 @@ public static class RecipeDetailEndpoint
     public static void MapRecipeDetailEndpoint(
         this WebApplication app)
     {
-        var group = app.MapGroup("/api/recipe-details");
+        var group = app.MapGroup("/api/recipeDetails");
 
         group.MapGet("/{recipeId:int:min(1)}", async (
             int recipeId,

@@ -8,7 +8,7 @@ public static class UnitConversionEndpoint
     public static void MapUnitConversionEndpoint(
         this WebApplication app)
     {
-        var group = app.MapGroup("/api/unit-conversions");
+        var group = app.MapGroup("/api/unitConversions");
 
         group.MapPost("/convert", async (
             ConvertUnitDto dto,

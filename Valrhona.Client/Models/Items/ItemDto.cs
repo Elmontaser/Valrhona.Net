@@ -1,4 +1,3 @@
-
 namespace Valrhona.Client.Models.Items;
 
 public class ItemDto
@@ -11,9 +10,17 @@ public class ItemDto
 
     public int ItemTypeId { get; set; }
 
+    public string? ItemTypeName { get; set; }
+
     public int CategoryId { get; set; }
 
+    public string? CategoryName { get; set; }
+
     public int UnitId { get; set; }
+
+    public string? UnitName { get; set; }
+
+    public string? Symbol { get; set; }
 
     public bool IsActive { get; set; }
 

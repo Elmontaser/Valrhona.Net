@@ -8,7 +8,7 @@ public static class ItemTypeEndpoint
     public static void MapItemTypeEndpoint(
         this WebApplication app)
     {
-        var group = app.MapGroup("/api/item-types");
+        var group = app.MapGroup("/api/itemTypes");
 
         group.MapGet("/", async (
             IItemTypeRepository repository) =>

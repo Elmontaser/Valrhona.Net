@@ -1,4 +1,3 @@
-
 using System.Net.Http.Json;
 using Valrhona.Client.Models.Items;
 
@@ -6,6 +5,7 @@ namespace Valrhona.Client.Services.Items;
 
 public class ItemService
 {
+    // BaseAddress ينتهي بـ api/ لذلك المسارات هنا نسبية بدون api/ في أولها
     private readonly HttpClient _httpClient;
 
     public ItemService(HttpClient httpClient)
@@ -15,9 +15,53 @@ public class ItemService
 
     public async Task<List<ItemDto>> GetAllAsync()
     {
-        var result = await _httpClient
-            .GetFromJsonAsync<List<ItemDto>>("Items");
+        var response = await _httpClient.GetAsync("Items");
 
-        return result ?? new List<ItemDto>();
+        return await response.ReadApiAsync<List<ItemDto>>();
+    }
+
+    public async Task CreateAsync(ItemFormModel model)
+    {
+        var response = await _httpClient.PostAsJsonAsync(
+            "Items",
+            new
+            {
+                model.ItemCode,
+                model.ItemName,
+                ItemTypeId = (byte)model.ItemTypeId,
+                model.CategoryId,
+                model.UnitId,
+                model.Notes
+            });
+
+        await response.EnsureApiSuccessAsync();
+    }
+
+    public async Task UpdateAsync(ItemFormModel model)
+    {
+        var response = await _httpClient.PutAsJsonAsync(
+            $"Items/{model.ItemId}",
+            new
+            {
+                model.ItemId,
+                model.ItemCode,
+                model.ItemName,
+                ItemTypeId = (byte)model.ItemTypeId,
+                model.CategoryId,
+                model.UnitId,
+                model.Notes
+            });
+
+        await response.EnsureApiSuccessAsync();
+    }
+
+    /// <summary>
+    /// إيقاف الصنف (تعطيل وليس حذفاً فعلياً).
+    /// </summary>
+    public async Task DeactivateAsync(int itemId)
+    {
+        var response = await _httpClient.DeleteAsync($"Items/{itemId}");
+
+        await response.EnsureApiSuccessAsync();
     }
 }

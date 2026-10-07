@@ -33,29 +33,26 @@ public class CategoryRepository(
     {
         using var connection = connectionFactory.CreateConnection();
 
-        await connection.ExecuteAsync(
+        await connection.ExecuteForResultAsync(
             "dbo.Category_Insert",
-            dto,
-            commandType: CommandType.StoredProcedure);
+            dto);
     }
 
     public async Task UpdateAsync(UpdateCategoryDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        await connection.ExecuteAsync(
+        await connection.ExecuteForResultAsync(
             "dbo.Category_Update",
-            dto,
-            commandType: CommandType.StoredProcedure);
+            dto);
     }
 
     public async Task DeleteAsync(DeleteCategoryDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        await connection.ExecuteAsync(
+        await connection.ExecuteForResultAsync(
             "dbo.Category_Delete",
-            dto,
-            commandType: CommandType.StoredProcedure);
+            dto);
     }
 }

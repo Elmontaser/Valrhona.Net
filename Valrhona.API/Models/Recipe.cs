@@ -10,9 +10,17 @@ public class Recipe
 
     public int OutputItemId { get; set; }
 
+    public string? OutputItemCode { get; set; }
+
+    public string? OutputItemName { get; set; }
+
     public decimal OutputQuantity { get; set; }
 
     public int OutputUnitId { get; set; }
+
+    public string? OutputUnitName { get; set; }
+
+    public string? OutputUnitSymbol { get; set; }
 
     public int VersionNo { get; set; }
 

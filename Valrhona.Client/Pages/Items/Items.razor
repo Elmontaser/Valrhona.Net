@@ -1,396 +1,286 @@
-﻿@page "/items"
+@page "/items"
 @using Valrhona.Client.Models.Items
+@using Valrhona.Client.Models.Lookups
 @using Valrhona.Client.Services.Items
+@using Valrhona.Client.Services.Lookups
 @inject ItemService ItemService
+@inject LookupService LookupService
 
 <PageTitle>الأصناف - Valrhona</PageTitle>
 
 <div class="container-fluid">
 
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-md-row
-        justify-content-between
-        align-items-md-center
-        gap-3 mb-4">
-
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">
-                الأصناف
-            </h2>
-
-            <p class="text-muted mb-0">
-                إدارة أصناف ومنتجات المصنع
-            </p>
+            <h2 class="fw-bold mb-1">الأصناف</h2>
+            <p class="text-muted mb-0">إدارة أصناف ومنتجات المصنع</p>
         </div>
-
-        <button type="button" class="btn btn-dark px-4">
-            <span class="me-2">＋</span>
-            إضافة صنف
+        <button type="button" class="btn btn-dark px-4" @onclick="OpenCreate" disabled="@isLoading">
+            <span class="me-2">＋</span> إضافة صنف
         </button>
-
     </div>
 
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible shadow-sm">
+            @successMessage
+            <button type="button" class="btn-close" aria-label="إغلاق" @onclick="() => successMessage = null"></button>
+        </div>
+    }
 
-    <!-- Search & Filters -->
+    <!-- Filters -->
     <div class="card border-0 shadow-sm mb-4">
-
         <div class="card-body">
-
             <div class="row g-3 align-items-end">
 
-                <!-- Search -->
-                <div class="col-12 col-lg-5">
-
-                    <label class="form-label fw-semibold">
-                        بحث
-                    </label>
-
+                <div class="col-12 col-lg-4">
+                    <label class="form-label fw-semibold">بحث</label>
                     <div class="input-group">
-
-                        <span class="input-group-text">
-                            🔍
-                        </span>
-
+                        <span class="input-group-text">🔍</span>
                         <input type="text" class="form-control" placeholder="ابحث بالكود أو اسم الصنف..."
-                               @bind="searchText" @bind:event="oninput" />
-
+                               value="@searchText" @oninput="OnSearchInput" />
                     </div>
-
                 </div>
 
-
-                <!-- Type -->
                 <div class="col-12 col-md-4 col-lg-3">
-
-                    <label class="form-label fw-semibold">
-                        نوع الصنف
-                    </label>
-
-                    <select class="form-select" @bind="selectedType">
-
-                        <option value="">
-                            جميع الأنواع
-                        </option>
-
-                        <option value="1">
-                            مادة خام
-                        </option>
-
-                        <option value="2">
-                            منتج نصف مصنع
-                        </option>
-
-                        <option value="3">
-                            منتج نهائي
-                        </option>
-
+                    <label class="form-label fw-semibold">نوع الصنف</label>
+                    <select class="form-select" value="@selectedType" @onchange="OnTypeChanged">
+                        <option value="">جميع الأنواع</option>
+                        @foreach (var t in itemTypes)
+                        {
+                            <option value="@t.ItemTypeId">@t.TypeName</option>
+                        }
                     </select>
-
                 </div>
 
-
-                <!-- Status -->
-                <div class="col-12 col-md-4 col-lg-2">
-
-                    <label class="form-label fw-semibold">
-                        الحالة
-                    </label>
-
-                    <select class="form-select" @bind="selectedStatus">
-
-                        <option value="">
-                            الكل
-                        </option>
-
-                        <option value="true">
-                            نشط
-                        </option>
-
-                        <option value="false">
-                            غير نشط
-                        </option>
-
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label fw-semibold">الحالة</label>
+                    <select class="form-select" value="@selectedStatus" @onchange="OnStatusChanged">
+                        <option value="">الكل</option>
+                        <option value="true">نشط</option>
+                        <option value="false">غير نشط</option>
                     </select>
-
                 </div>
 
-
-                <!-- Reset -->
                 <div class="col-12 col-md-4 col-lg-2">
-
                     <button type="button" class="btn btn-outline-secondary w-100" @onclick="ResetFilters">
-
                         إعادة ضبط
-
                     </button>
-
                 </div>
 
             </div>
-
         </div>
-
     </div>
-
 
     @if (isLoading)
     {
         <div class="card border-0 shadow-sm">
-
             <div class="card-body text-center py-5">
-
                 <div class="spinner-border text-dark" role="status">
-
-                    <span class="visually-hidden">
-                        جاري التحميل...
-                    </span>
-
+                    <span class="visually-hidden">جاري التحميل...</span>
                 </div>
-
-                <div class="mt-3 text-muted">
-                    جاري تحميل الأصناف...
-                </div>
-
+                <div class="mt-3 text-muted">جاري تحميل الأصناف...</div>
             </div>
-
         </div>
     }
     else if (!string.IsNullOrWhiteSpace(errorMessage))
     {
         <div class="alert alert-danger shadow-sm">
-
-            <strong>
-                حدث خطأ أثناء تحميل الأصناف
-            </strong>
-
-            <div class="mt-1">
-                @errorMessage
-            </div>
-
+            <strong>حدث خطأ أثناء تحميل الأصناف</strong>
+            <div class="mt-1">@errorMessage</div>
+            <button class="btn btn-sm btn-outline-danger mt-2" @onclick="LoadAllAsync">إعادة المحاولة</button>
         </div>
     }
     else
     {
         <div class="card border-0 shadow-sm">
-
             <div class="card-body p-0">
-
                 <div class="table-responsive">
-
                     <table class="table table-hover align-middle mb-0">
-
                         <thead class="table-light">
-
                             <tr>
-
-                                <th class="px-4">
-                                    #
-                                </th>
-
-                                <th>
-                                    كود الصنف
-                                </th>
-
-                                <th>
-                                    اسم الصنف
-                                </th>
-
-                                <th>
-                                    النوع
-                                </th>
-
-                                <th>
-                                    الوحدة
-                                </th>
-
-                                <th>
-                                    الحالة
-                                </th>
-
-                                <th class="text-center">
-                                    الإجراءات
-                                </th>
-
+                                <th class="px-4" role="button" @onclick='() => SortBy("id")'># @SortIcon("id")</th>
+                                <th role="button" @onclick='() => SortBy("code")'>كود الصنف @SortIcon("code")</th>
+                                <th role="button" @onclick='() => SortBy("name")'>اسم الصنف @SortIcon("name")</th>
+                                <th role="button" @onclick='() => SortBy("type")'>النوع @SortIcon("type")</th>
+                                <th>الفئة</th>
+                                <th>الوحدة</th>
+                                <th>الحالة</th>
+                                <th class="text-center">الإجراءات</th>
                             </tr>
-
                         </thead>
-
-
                         <tbody>
-
-                            @if (!FilteredItems.Any())
+                            @if (pagedItems.Count == 0)
                             {
                                 <tr>
-
-                                    <td colspan="7" class="text-center py-5 text-muted">
-
+                                    <td colspan="8" class="text-center py-5 text-muted">
                                         لا توجد أصناف مطابقة للبحث.
-
                                     </td>
-
                                 </tr>
                             }
                             else
                             {
-                                @foreach (var item in FilteredItems)
+                                @foreach (var item in pagedItems)
                                 {
-                                    <tr>
-
-                                        <td class="px-4">
-                                            @item.ItemId
-                                        </td>
-
+                                    <tr class="@(item.IsActive ? "" : "text-muted")">
+                                        <td class="px-4">@item.ItemId</td>
+                                        <td><span class="fw-semibold">@item.ItemCode</span></td>
+                                        <td>@item.ItemName</td>
+                                        <td>@GetItemTypeName(item)</td>
+                                        <td>@GetCategoryName(item)</td>
+                                        <td>@GetUnitName(item)</td>
                                         <td>
-                                            <span class="fw-semibold">
-                                                @item.ItemCode
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            @item.ItemName
-                                        </td>
-
-                                        <td>
-                                            @GetItemTypeName(item.ItemTypeId)
-                                        </td>
-
-                                        <td>
-                                            @GetUnitName(item.UnitId)
-                                        </td>
-
-                                        <td>
-
                                             @if (item.IsActive)
                                             {
-                                                <span class="badge text-bg-success">
-                                                    نشط
-                                                </span>
+                                                <span class="badge text-bg-success">نشط</span>
                                             }
                                             else
                                             {
-                                                <span class="badge text-bg-secondary">
-                                                    غير نشط
-                                                </span>
+                                                <span class="badge text-bg-secondary">غير نشط</span>
                                             }
-
                                         </td>
-
-                                        <td class="text-center">
-
-                                            <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل">
-
-                                                ✏️
-
-                                            </button>
-
-                                            <button type="button" class="btn btn-sm btn-outline-danger" title="حذف">
-
-                                                🗑️
-
-                                            </button>
-
+                                        <td class="text-center text-nowrap">
+                                            <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل"
+                                                    @onclick="() => OpenEdit(item)">✏️</button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="إيقاف الصنف"
+                                                    disabled="@(!item.IsActive)" @onclick="() => AskDeactivate(item)">⛔</button>
                                         </td>
-
                                     </tr>
                                 }
                             }
-
                         </tbody>
-
                     </table>
-
                 </div>
-
             </div>
-
 
             <!-- Pagination -->
             <div class="card-footer bg-white">
-
-                <div class="d-flex flex-column flex-md-row
-                    justify-content-between
-                    align-items-center
-                    gap-2">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
 
                     <small class="text-muted">
-
-                        عرض @FilteredItems.Count() من @items.Count صنف
-
+                        عرض @pagedItems.Count من @filteredItems.Count صنف (الإجمالي @items.Count)
                     </small>
 
+                    <div class="d-flex align-items-center gap-2">
+                        <select class="form-select form-select-sm" style="width:auto" value="@pageSize"
+                                @onchange="OnPageSizeChanged">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+
+                        <button class="btn btn-sm btn-outline-secondary" disabled="@(currentPage <= 1)"
+                                @onclick="PreviousPage">السابق</button>
+                        <span class="small">@currentPage / @TotalPages</span>
+                        <button class="btn btn-sm btn-outline-secondary" disabled="@(currentPage >= TotalPages)"
+                                @onclick="NextPage">التالي</button>
+                    </div>
+
                 </div>
-
             </div>
-
         </div>
     }
 
 </div>
 
+<!-- Add / Edit Modal -->
+@if (showForm)
+{
+    <ItemFormModal Form="@form" ItemTypes="@itemTypes" Units="@units" Categories="@categories" FormError="@formError"
+                   IsSaving="@isSaving" OnValidSubmit="SaveAsync" OnClose="CloseForm" />
+}
+
+<!-- Deactivate Confirm -->
+@if (itemToDeactivate is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="fs-1">⚠️</div>
+                    <p class="mt-2 mb-1">هل تريد إيقاف هذا الصنف؟</p>
+                    <strong>@itemToDeactivate.ItemName</strong>
+                    <div class="text-muted small mt-2">
+                        يبقى الصنف في السجلات لكنه يصبح غير نشط.
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(deactivateError))
+                    {
+                        <div class="alert alert-danger py-2 mt-3 mb-0 small">@deactivateError</div>
+                    }
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-outline-secondary" @onclick="CancelDeactivate"
+                            disabled="@isSaving">إلغاء</button>
+                    <button class="btn btn-danger" @onclick="ConfirmDeactivateAsync" disabled="@isSaving">إيقاف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
 
     private List<ItemDto> items = new();
+    private List<UnitDto> units = new();
+    private List<ItemTypeDto> itemTypes = new();
+    private List<CategoryDto> categories = new();
+
+    // نتيجة التصفية والترتيب، تُحسب مرة واحدة عند كل تغيير
+    private List<ItemDto> filteredItems = new();
+    private List<ItemDto> pagedItems = new();
 
     private bool isLoading = true;
-
+    private bool isSaving;
     private string? errorMessage;
+    private string? successMessage;
 
+    // filters
     private string searchText = string.Empty;
-
     private string selectedType = string.Empty;
-
     private string selectedStatus = string.Empty;
 
+    // sort + paging
+    private string sortColumn = "id";
+    private bool sortDescending;
+    private int currentPage = 1;
+    private int pageSize = 10;
 
-    private IEnumerable<ItemDto> FilteredItems
-    {
-        get
-        {
-            IEnumerable<ItemDto> result = items;
+    // form
+    private bool showForm;
+    private ItemFormModel form = new();
+    private string? formError;
 
-            if (!string.IsNullOrWhiteSpace(searchText))
-            {
-                var search = searchText.Trim();
+    // deactivate
+    private ItemDto? itemToDeactivate;
+    private string? deactivateError;
 
-                result = result.Where(x =>
-                    x.ItemCode.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                    x.ItemName.Contains(search, StringComparison.OrdinalIgnoreCase));
-            }
+    private int TotalPages =>
+        Math.Max(1, (int)Math.Ceiling(filteredItems.Count / (double)pageSize));
 
-            if (!string.IsNullOrWhiteSpace(selectedType) &&
-                int.TryParse(selectedType, out var typeId))
-            {
-                result = result.Where(x =>
-                    x.ItemTypeId == typeId);
-            }
+    protected override async Task OnInitializedAsync() => await LoadAllAsync();
 
-            if (!string.IsNullOrWhiteSpace(selectedStatus) &&
-                bool.TryParse(selectedStatus, out var status))
-            {
-                result = result.Where(x =>
-                    x.IsActive == status);
-            }
-
-            return result;
-        }
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadItemsAsync();
-    }
-
-
-    private async Task LoadItemsAsync()
+    private async Task LoadAllAsync()
     {
         try
         {
             isLoading = true;
             errorMessage = null;
 
-            items = await ItemService.GetAllAsync();
+            var itemsTask = ItemService.GetAllAsync();
+            var unitsTask = LookupService.GetUnitsAsync();
+            var typesTask = LookupService.GetItemTypesAsync();
+            var catsTask = LookupService.GetCategoriesAsync();
+
+            await Task.WhenAll(itemsTask, unitsTask, typesTask, catsTask);
+
+            items = itemsTask.Result;
+            units = unitsTask.Result;
+            itemTypes = typesTask.Result;
+            categories = catsTask.Result;
+
+            Refresh();
         }
         catch (Exception ex)
         {
@@ -402,34 +292,237 @@
         }
     }
 
+    // ---------- filtering / sorting / paging ----------
+    private void Refresh()
+    {
+        IEnumerable<ItemDto> result = items;
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var s = searchText.Trim();
+            result = result.Where(x =>
+                x.ItemCode.Contains(s, StringComparison.OrdinalIgnoreCase) ||
+                x.ItemName.Contains(s, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (int.TryParse(selectedType, out var typeId))
+            result = result.Where(x => x.ItemTypeId == typeId);
+
+        if (bool.TryParse(selectedStatus, out var status))
+            result = result.Where(x => x.IsActive == status);
+
+        result = (sortColumn, sortDescending) switch
+        {
+            ("code", false) => result.OrderBy(x => x.ItemCode),
+            ("code", true) => result.OrderByDescending(x => x.ItemCode),
+            ("name", false) => result.OrderBy(x => x.ItemName),
+            ("name", true) => result.OrderByDescending(x => x.ItemName),
+            ("type", false) => result.OrderBy(x => x.ItemTypeId),
+            ("type", true) => result.OrderByDescending(x => x.ItemTypeId),
+            ("id", true) => result.OrderByDescending(x => x.ItemId),
+            _ => result.OrderBy(x => x.ItemId)
+        };
+
+        filteredItems = result.ToList();
+
+        if (currentPage > TotalPages)
+            currentPage = TotalPages;
+
+        UpdatePage();
+    }
+
+    private void UpdatePage()
+    {
+        pagedItems = filteredItems
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchText = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        Refresh();
+    }
+
+    private void OnTypeChanged(ChangeEventArgs e)
+    {
+        selectedType = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        Refresh();
+    }
+
+    private void OnStatusChanged(ChangeEventArgs e)
+    {
+        selectedStatus = e.Value?.ToString() ?? string.Empty;
+        currentPage = 1;
+        Refresh();
+    }
+
+    private void OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var size))
+            pageSize = size;
+
+        currentPage = 1;
+        Refresh();
+    }
 
     private void ResetFilters()
     {
-        searchText = string.Empty;
-        selectedType = string.Empty;
-        selectedStatus = string.Empty;
+        searchText = selectedType = selectedStatus = string.Empty;
+        currentPage = 1;
+        Refresh();
     }
 
-
-    private static string GetItemTypeName(int itemTypeId)
+    private void SortBy(string column)
     {
-        return itemTypeId switch
+        if (sortColumn == column)
         {
-            1 => "مادة خام",
-            2 => "منتج نصف مصنع",
-            3 => "منتج نهائي",
-            _ => $"نوع {itemTypeId}"
-        };
+            sortDescending = !sortDescending;
+        }
+        else
+        {
+            sortColumn = column;
+            sortDescending = false;
+        }
+
+        Refresh();
     }
 
+    private string SortIcon(string column) =>
+        sortColumn != column ? "" : sortDescending ? "▼" : "▲";
 
-    private static string GetUnitName(int unitId)
+    private void PreviousPage()
     {
-        return unitId switch
+        if (currentPage > 1)
         {
-            1 => "كجم",
-            _ => $"وحدة {unitId}"
-        };
+            currentPage--;
+            UpdatePage();
+        }
     }
 
+    private void NextPage()
+    {
+        if (currentPage < TotalPages)
+        {
+            currentPage++;
+            UpdatePage();
+        }
+    }
+
+    // ---------- add / edit ----------
+    private void OpenCreate()
+    {
+        form = new ItemFormModel();
+        formError = null;
+        showForm = true;
+    }
+
+    private void OpenEdit(ItemDto item)
+    {
+        form = new ItemFormModel
+        {
+            ItemId = item.ItemId,
+            ItemCode = item.ItemCode,
+            ItemName = item.ItemName,
+            ItemTypeId = item.ItemTypeId,
+            CategoryId = item.CategoryId,
+            UnitId = item.UnitId,
+            Notes = item.Notes
+        };
+
+        formError = null;
+        showForm = true;
+    }
+
+    private void CloseForm() => showForm = false;
+
+    private async Task SaveAsync()
+    {
+        try
+        {
+            isSaving = true;
+            formError = null;
+
+            var isNew = form.ItemId == 0;
+
+            if (isNew)
+                await ItemService.CreateAsync(form);
+            else
+                await ItemService.UpdateAsync(form);
+
+            items = await ItemService.GetAllAsync();
+            Refresh();
+
+            showForm = false;
+            successMessage = isNew
+                ? "تمت إضافة الصنف بنجاح."
+                : "تم تعديل الصنف بنجاح.";
+        }
+        catch (Exception ex)
+        {
+            // يبقى النموذج مفتوحاً لتصحيح البيانات
+            formError = ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    // ---------- deactivate ----------
+    private void AskDeactivate(ItemDto item)
+    {
+        itemToDeactivate = item;
+        deactivateError = null;
+    }
+
+    private void CancelDeactivate() => itemToDeactivate = null;
+
+    private async Task ConfirmDeactivateAsync()
+    {
+        if (itemToDeactivate is null)
+            return;
+
+        try
+        {
+            isSaving = true;
+            deactivateError = null;
+
+            await ItemService.DeactivateAsync(itemToDeactivate.ItemId);
+
+            itemToDeactivate = null;
+
+            items = await ItemService.GetAllAsync();
+            Refresh();
+
+            successMessage = "تم إيقاف الصنف.";
+        }
+        catch (Exception ex)
+        {
+            deactivateError = ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    // ---------- display names (من الـ API، وإلا من القوائم) ----------
+    private string GetItemTypeName(ItemDto item) =>
+        item.ItemTypeName
+        ?? itemTypes.FirstOrDefault(x => x.ItemTypeId == item.ItemTypeId)?.TypeName
+        ?? $"نوع {item.ItemTypeId}";
+
+    private string GetCategoryName(ItemDto item) =>
+        item.CategoryName
+        ?? categories.FirstOrDefault(x => x.CategoryId == item.CategoryId)?.CategoryName
+        ?? $"فئة {item.CategoryId}";
+
+    private string GetUnitName(ItemDto item) =>
+        item.UnitName
+        ?? units.FirstOrDefault(x => x.UnitId == item.UnitId)?.UnitName
+        ?? $"وحدة {item.UnitId}";
 }

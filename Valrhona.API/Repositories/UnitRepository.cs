@@ -32,6 +32,7 @@ public class UnitRepository(SqlConnectionFactory connectionFactory)
             commandType: CommandType.StoredProcedure);
     }
 
+    // Unit_Insert يعتمد على THROW (يصل للمستخدم كـ 400 برسالة عربية)
     public async Task<Unit?> InsertAsync(CreateUnitDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
@@ -46,18 +47,17 @@ public class UnitRepository(SqlConnectionFactory connectionFactory)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        await connection.ExecuteAsync(
-            "dbo.Unit_Update", dto,
-            commandType: CommandType.StoredProcedure);
+        await connection.ExecuteForResultAsync(
+            "dbo.Unit_Update",
+            dto);
     }
 
     public async Task DeleteAsync(DeleteUnitDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        await connection.ExecuteAsync(
+        await connection.ExecuteForResultAsync(
             "dbo.Unit_Delete",
-            dto,
-            commandType: CommandType.StoredProcedure);
+            dto);
     }
 }

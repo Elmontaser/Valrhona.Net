@@ -98,11 +98,10 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
 
         int resultCode = result.ResultCode;
 
-        if (resultCode != 1)
-        {
-            throw new InvalidOperationException(
-                (string)result.ResultMessage);
-        }
+        DbResult.EnsureSuccess(
+            resultCode,
+            (string?)result.ResultMessage,
+            (string?)result.ErrorMessage);
 
         int recipeId = result.RecipeId;
 
@@ -162,11 +161,10 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
 
         int resultCode = result.ResultCode;
 
-        if (resultCode != 1)
-        {
-            throw new InvalidOperationException(
-                (string)result.ResultMessage);
-        }
+        DbResult.EnsureSuccess(
+            resultCode,
+            (string?)result.ResultMessage,
+            (string?)result.ErrorMessage);
 
         return await GetByIdAsync(dto.RecipeId);
     }
@@ -185,11 +183,10 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
 
         int resultCode = result.ResultCode;
 
-        if (resultCode != 1)
-        {
-            throw new InvalidOperationException(
-                (string)result.ResultMessage);
-        }
+        DbResult.EnsureSuccess(
+            resultCode,
+            (string?)result.ResultMessage,
+            (string?)result.ErrorMessage);
 
         return true;
     }

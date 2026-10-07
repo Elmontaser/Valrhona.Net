@@ -35,11 +35,12 @@ public static class RecipeEndpoint
         {
             var recipe = await repository.InsertAsync(dto);
 
-            return recipe is null
-                ? Results.BadRequest()
-                : Results.Created(
-                    $"/api/recipes/{recipe.RecipeId}",
-                    recipe);
+            if (recipe is not { } createdRecipe)
+                return Results.BadRequest();
+
+            return Results.Created(
+                $"/api/recipes/{createdRecipe.RecipeId}",
+                createdRecipe);
         });
 
         group.MapGet(

@@ -2,6 +2,7 @@ using System.Data;
 using Dapper;
 using Valrhona.API.Data;
 using Valrhona.API.Dtos.Items;
+using Valrhona.API.Exceptions;
 using Valrhona.API.Interfaces;
 using Valrhona.API.Models;
 
@@ -36,29 +37,36 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        return await connection.QuerySingleOrDefaultAsync<Item>(
+        // يرمي BusinessRuleException عند الفشل (كود مكرر، فئة غير فعالة...)
+        var result = await connection.ExecuteForResultAsync(
             "dbo.Item_Insert",
-            dto,
-            commandType: CommandType.StoredProcedure);
+            dto);
+
+        if (result.ItemId is null)
+        {
+            throw new InvalidOperationException(
+                "لم يُرجع Item_Insert معرّف الصنف.");
+        }
+
+        return await GetByIdAsync(result.ItemId.Value);
     }
 
     public async Task UpdateAsync(UpdateItemDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        await connection.ExecuteAsync(
+        await connection.ExecuteForResultAsync(
             "dbo.Item_Update",
-            dto, commandType: CommandType.StoredProcedure);
+            dto);
     }
 
     public async Task DeleteAsync(DeleteItemDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        await connection.ExecuteAsync(
+        await connection.ExecuteForResultAsync(
             "dbo.Item_Delete",
-            dto,
-            commandType: CommandType.StoredProcedure);
+            dto);
     }
 
     public async Task<IEnumerable<Item>> SearchAsync(SearchItemDto dto)

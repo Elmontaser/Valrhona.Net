@@ -41,11 +41,10 @@ public class RecipeDetailRepository(
 
         int resultCode = result.ResultCode;
 
-        if (resultCode != 1)
-        {
-            throw new InvalidOperationException(
-                (string)result.ResultMessage);
-        }
+        DbResult.EnsureSuccess(
+            resultCode,
+            (string?)result.ResultMessage,
+            (string?)result.ErrorMessage);
 
         return true;
     }
@@ -64,11 +63,10 @@ public class RecipeDetailRepository(
 
         int resultCode = result.ResultCode;
 
-        if (resultCode != 1)
-        {
-            throw new InvalidOperationException(
-                (string)result.ResultMessage);
-        }
+        DbResult.EnsureSuccess(
+            resultCode,
+            (string?)result.ResultMessage,
+            (string?)result.ErrorMessage);
 
         return true;
     }

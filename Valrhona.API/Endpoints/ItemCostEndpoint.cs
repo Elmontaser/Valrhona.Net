@@ -8,7 +8,7 @@ public static class ItemCostEndpoint
     public static void MapItemCostEndpoint(
         this WebApplication app)
     {
-        var group = app.MapGroup("/api/item-costs");
+        var group = app.MapGroup("/api/itemCosts");
 
         group.MapPost("/recalculate", async (
             RecalculateItemCostDto dto,
