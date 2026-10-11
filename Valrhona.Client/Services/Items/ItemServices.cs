@@ -58,9 +58,11 @@ public class ItemService
     /// <summary>
     /// إيقاف الصنف (تعطيل وليس حذفاً فعلياً).
     /// </summary>
-    public async Task DeactivateAsync(int itemId)
+    public async Task ActivateAsync(int itemId, bool isActive)
     {
-        var response = await _httpClient.DeleteAsync($"Items/{itemId}");
+        var response = await _httpClient.PutAsync(
+            $"Items/{itemId}/activate?isActive={isActive.ToString().ToLowerInvariant()}",
+            content: null);
 
         await response.EnsureApiSuccessAsync();
     }

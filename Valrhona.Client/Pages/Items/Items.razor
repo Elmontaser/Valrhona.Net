@@ -29,6 +29,14 @@
         </div>
     }
 
+    @if (!string.IsNullOrWhiteSpace(operationError))
+    {
+        <div class="alert alert-danger alert-dismissible shadow-sm">
+            @operationError
+            <button type="button" class="btn-close" aria-label="إغلاق" @onclick="() => operationError = null"></button>
+        </div>
+    }
+
     <!-- Filters -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
@@ -143,8 +151,12 @@
                                         <td class="text-center text-nowrap">
                                             <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل"
                                                     @onclick="() => OpenEdit(item)">✏️</button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" title="إيقاف الصنف"
-                                                    disabled="@(!item.IsActive)" @onclick="() => AskDeactivate(item)">⛔</button>
+                                            <button type="button"
+                                                    class="btn btn-sm @(item.IsActive ? "btn-outline-danger" : "btn-outline-success")"
+                                                    title="@(item.IsActive ? "إيقاف الصنف" : "تفعيل الصنف")"
+                                                    aria-label="@(item.IsActive ? "إيقاف الصنف" : "تفعيل الصنف")"
+                                                    disabled="@isSaving"
+                                                    @onclick="() => AskToggleItemStatus(item)">@(item.IsActive ? "⛔" : "▶")</button>
                                         </td>
                                     </tr>
                                 }
@@ -184,40 +196,42 @@
 
 </div>
 
-<!-- Add / Edit Modal -->
-@if (showForm)
-{
-    <ItemFormModal Form="@form" ItemTypes="@itemTypes" Units="@units" Categories="@categories" FormError="@formError"
-                   IsSaving="@isSaving" OnValidSubmit="SaveAsync" OnClose="CloseForm" />
-}
-
-<!-- Deactivate Confirm -->
-@if (itemToDeactivate is not null)
+@if (itemPendingStatusChange is not null)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-body text-center py-4">
-                    <div class="fs-1">⚠️</div>
-                    <p class="mt-2 mb-1">هل تريد إيقاف هذا الصنف؟</p>
-                    <strong>@itemToDeactivate.ItemName</strong>
-                    <div class="text-muted small mt-2">
-                        يبقى الصنف في السجلات لكنه يصبح غير نشط.
-                    </div>
-
-                    @if (!string.IsNullOrWhiteSpace(deactivateError))
+                    <div class="fs-1">@(pendingIsActive ? "▶" : "⚠️")</div>
+                    <p class="mt-2 mb-1">هل تريد @(pendingIsActive ? "تفعيل" : "إيقاف") هذا الصنف؟</p>
+                    <strong>@itemPendingStatusChange.ItemName</strong>
+                    @if (!pendingIsActive)
                     {
-                        <div class="alert alert-danger py-2 mt-3 mb-0 small">@deactivateError</div>
+                        <div class="text-muted small mt-2">سيبقى الصنف في السجلات لكنه سيصبح غير نشط.</div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(statusChangeError))
+                    {
+                        <div class="alert alert-danger py-2 mt-3 mb-0 small">@statusChangeError</div>
                     }
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button class="btn btn-outline-secondary" @onclick="CancelDeactivate"
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CancelStatusChange"
                             disabled="@isSaving">إلغاء</button>
-                    <button class="btn btn-danger" @onclick="ConfirmDeactivateAsync" disabled="@isSaving">إيقاف</button>
+                    <button type="button" class="btn @(pendingIsActive ? "btn-success" : "btn-danger")"
+                            @onclick="ConfirmStatusChangeAsync" disabled="@isSaving">
+                        @(isSaving ? "جارٍ الحفظ..." : pendingIsActive ? "تفعيل" : "إيقاف")
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+}
+
+<!-- Add / Edit Modal -->
+@if (showForm)
+{
+    <ItemFormModal Form="@form" ItemTypes="@itemTypes" Units="@units" Categories="@categories" FormError="@formError"
+                   IsSaving="@isSaving" OnValidSubmit="SaveAsync" OnClose="CloseForm" />
 }
 
 @code {
@@ -235,6 +249,7 @@
     private bool isSaving;
     private string? errorMessage;
     private string? successMessage;
+    private string? operationError;
 
     // filters
     private string searchText = string.Empty;
@@ -251,10 +266,9 @@
     private bool showForm;
     private ItemFormModel form = new();
     private string? formError;
-
-    // deactivate
-    private ItemDto? itemToDeactivate;
-    private string? deactivateError;
+    private ItemDto? itemPendingStatusChange;
+    private bool pendingIsActive;
+    private string? statusChangeError;
 
     private int TotalPages =>
         Math.Max(1, (int)Math.Ceiling(filteredItems.Count / (double)pageSize));
@@ -472,37 +486,39 @@
         }
     }
 
-    // ---------- deactivate ----------
-    private void AskDeactivate(ItemDto item)
+    private void AskToggleItemStatus(ItemDto item)
     {
-        itemToDeactivate = item;
-        deactivateError = null;
+        itemPendingStatusChange = item;
+        pendingIsActive = !item.IsActive;
+        statusChangeError = null;
     }
 
-    private void CancelDeactivate() => itemToDeactivate = null;
+    private void CancelStatusChange() => itemPendingStatusChange = null;
 
-    private async Task ConfirmDeactivateAsync()
+    private async Task ConfirmStatusChangeAsync()
     {
-        if (itemToDeactivate is null)
+        if (itemPendingStatusChange is null)
             return;
 
         try
         {
             isSaving = true;
-            deactivateError = null;
+            statusChangeError = null;
+            operationError = null;
+            successMessage = null;
 
-            await ItemService.DeactivateAsync(itemToDeactivate.ItemId);
-
-            itemToDeactivate = null;
+            await ItemService.ActivateAsync(itemPendingStatusChange.ItemId, pendingIsActive);
 
             items = await ItemService.GetAllAsync();
             Refresh();
-
-            successMessage = "تم إيقاف الصنف.";
+            successMessage = pendingIsActive
+                ? "تم تفعيل الصنف."
+                : "تم إيقاف الصنف.";
+            itemPendingStatusChange = null;
         }
         catch (Exception ex)
         {
-            deactivateError = ex.Message;
+            statusChangeError = ex.Message;
         }
         finally
         {

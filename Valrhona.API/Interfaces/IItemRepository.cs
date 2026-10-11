@@ -9,7 +9,7 @@ public interface IItemRepository
     Task<Item?> GetByIdAsync(int itemId);
     Task<Item?> InsertAsync(CreateItemDto dto);
     Task UpdateAsync(UpdateItemDto dto);
-    Task DeleteAsync(DeleteItemDto dto);
+    Task ActivateAsync(ActivateItemDto dto);
     Task<IEnumerable<Item>> SearchAsync(SearchItemDto dto);
 
 }

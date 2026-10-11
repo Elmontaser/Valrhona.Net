@@ -47,3 +47,9 @@ Content-Type: application/json
 {
   "asOfDate": "2026-09-30"
 }
+
+### Activate item (replace 1 with the item ID)
+PUT {{Valrhona.API_HostAddress}}/items/1/activate?isActive=true
+
+### Deactivate item (replace 1 with the item ID)
+PUT {{Valrhona.API_HostAddress}}/items/1/activate?isActive=false
