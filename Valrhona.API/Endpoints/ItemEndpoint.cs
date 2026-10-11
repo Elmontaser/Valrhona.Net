@@ -54,16 +54,18 @@ public static class ItemEndpoint
             return Results.NoContent();
         });
 
-        group.MapDelete("/{id:int:min(1)}", async (
+        group.MapPut("/{id:int:min(1)}/activate", async (
             int id,
+            bool isActive,
             IItemRepository repository) =>
         {
-            var dto = new DeleteItemDto
+            var dto = new ActivateItemDto
             {
-                ItemId = id
+                ItemId = id,
+                IsActive = isActive
             };
 
-            await repository.DeleteAsync(dto);
+            await repository.ActivateAsync(dto);
 
             return Results.NoContent();
         });

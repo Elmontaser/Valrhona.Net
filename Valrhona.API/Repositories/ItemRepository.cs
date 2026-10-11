@@ -60,13 +60,12 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
             dto);
     }
 
-    public async Task DeleteAsync(DeleteItemDto dto)
+    public async Task ActivateAsync(ActivateItemDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Item_Delete",
-            dto);
+            "dbo.Item_Activate", dto);
     }
 
     public async Task<IEnumerable<Item>> SearchAsync(SearchItemDto dto)
