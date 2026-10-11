@@ -723,56 +723,6 @@ BEGIN
     END CATCH
 END
 GO
-/****** Object:  StoredProcedure [dbo].[Item_Activate] ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[Item_Activate]
-    @ItemId INT,
-    @IsActive BIT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SET XACT_ABORT ON;
-
-    BEGIN TRY
-        IF NOT EXISTS
-        (
-            SELECT 1
-            FROM dbo.Items
-            WHERE ItemId = @ItemId
-        )
-        BEGIN
-            SELECT
-                -1 AS ResultCode,
-                N'الصنف غير موجود' AS ResultMessage;
-            RETURN;
-        END;
-
-        UPDATE dbo.Items
-        SET
-            IsActive = @IsActive,
-            UpdatedAt = SYSDATETIME()
-        WHERE ItemId = @ItemId;
-
-        SELECT
-            1 AS ResultCode,
-            CASE WHEN @IsActive = 1
-                THEN N'تم تفعيل الصنف بنجاح'
-                ELSE N'تم إيقاف الصنف بنجاح'
-            END AS ResultMessage,
-            @ItemId AS ItemId;
-    END TRY
-    BEGIN CATCH
-        SELECT
-            -500 AS ResultCode,
-            N'حدث خطأ أثناء تغيير حالة الصنف' AS ResultMessage,
-            ERROR_NUMBER() AS ErrorNumber,
-            ERROR_MESSAGE() AS ErrorMessage;
-    END CATCH
-END
-GO
 /****** Object:  StoredProcedure [Item_GetAll]    Script Date: 11/10/2026 12:25:16 م ******/
 SET ANSI_NULLS ON
 GO
