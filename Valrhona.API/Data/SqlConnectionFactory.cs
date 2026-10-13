@@ -11,7 +11,7 @@ public class SqlConnectionFactory
     public SqlConnectionFactory(IConfiguration configuration)
     {
         _connectionString =
-            configuration.GetConnectionString("DesktopConnection")
+            configuration.GetConnectionString("webConnection")
             ?? throw new InvalidOperationException(
                 "Connection string 'DefaultConnection' was not found.");
     }

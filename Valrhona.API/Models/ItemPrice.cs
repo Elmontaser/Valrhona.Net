@@ -20,4 +20,7 @@ public class ItemPrice
     // تستخدم عند جلب الأسعار المستحقة
     public string? ItemCode { get; set; }
     public string? ItemName { get; set; }
+    public string? UnitName { get; set; }
+    public string? UnitSymbol { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

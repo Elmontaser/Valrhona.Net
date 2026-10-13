@@ -19,6 +19,7 @@ public class ProcedureResult
     public int? ItemId { get; set; }
     public int? CategoryId { get; set; }
     public int? UnitId { get; set; }
+    public int? UnitConversionId { get; set; }
 }
 
 public static class DbResult

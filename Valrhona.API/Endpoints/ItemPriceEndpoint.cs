@@ -10,6 +10,14 @@ public static class ItemPriceEndpoint
     {
         var group = app.MapGroup("/api/itemPrices");
 
+        group.MapGet("/", async (
+            IItemPriceRepository repository) =>
+        {
+            var prices = await repository.GetAllAsync();
+
+            return Results.Ok(prices);
+        });
+
         group.MapPost("/", async (
             SetItemPriceDto dto,
             IItemPriceRepository repository) =>

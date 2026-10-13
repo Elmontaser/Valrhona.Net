@@ -2,6 +2,7 @@ namespace Valrhona.Client.Models.Recipes;
 
 public class RecipeIngredientDto
 {
+    public long RecipeDetailId { get; set; }
     public int IngredientItemId { get; set; }
     public string ItemCode { get; set; } = string.Empty;
     public string ItemName { get; set; } = string.Empty;

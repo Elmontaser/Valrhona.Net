@@ -435,6 +435,276 @@ BEGIN
     END CATCH
 END
 GO
+/****** Object: StoredProcedure [UnitConversion_GetAll] ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [UnitConversion_GetAll]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        uc.UnitConversionId,
+        uc.FromUnitId,
+        fromUnit.UnitName AS FromUnitName,
+        fromUnit.Symbol AS FromUnitSymbol,
+        uc.ToUnitId,
+        toUnit.UnitName AS ToUnitName,
+        toUnit.Symbol AS ToUnitSymbol,
+        uc.ConversionFactor,
+        uc.IsActive,
+        uc.Notes,
+        uc.CreatedAt
+    FROM dbo.UnitConversions uc
+    INNER JOIN dbo.Units fromUnit ON fromUnit.UnitId = uc.FromUnitId
+    INNER JOIN dbo.Units toUnit ON toUnit.UnitId = uc.ToUnitId
+    ORDER BY fromUnit.UnitName, toUnit.UnitName;
+END
+GO
+/****** Object: StoredProcedure [UnitConversion_GetById] ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [UnitConversion_GetById]
+    @UnitConversionId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        uc.UnitConversionId,
+        uc.FromUnitId,
+        fromUnit.UnitName AS FromUnitName,
+        fromUnit.Symbol AS FromUnitSymbol,
+        uc.ToUnitId,
+        toUnit.UnitName AS ToUnitName,
+        toUnit.Symbol AS ToUnitSymbol,
+        uc.ConversionFactor,
+        uc.IsActive,
+        uc.Notes,
+        uc.CreatedAt
+    FROM dbo.UnitConversions uc
+    INNER JOIN dbo.Units fromUnit ON fromUnit.UnitId = uc.FromUnitId
+    INNER JOIN dbo.Units toUnit ON toUnit.UnitId = uc.ToUnitId
+    WHERE uc.UnitConversionId = @UnitConversionId;
+END
+GO
+/****** Object: StoredProcedure [UnitConversion_Insert] ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [UnitConversion_Insert]
+    @FromUnitId INT,
+    @ToUnitId INT,
+    @ConversionFactor DECIMAL(18,8),
+    @Notes NVARCHAR(500) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        IF @FromUnitId = @ToUnitId
+        BEGIN
+            SELECT -1 AS ResultCode,
+                   N'يجب أن تختلف وحدة المصدر عن وحدة الهدف.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF @ConversionFactor <= 0
+        BEGIN
+            SELECT -2 AS ResultCode,
+                   N'معامل التحويل يجب أن يكون أكبر من صفر.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF (SELECT COUNT(*)
+            FROM dbo.Units
+            WHERE UnitId IN (@FromUnitId, @ToUnitId)
+              AND IsActive = 1) <> 2
+        BEGIN
+            SELECT -3 AS ResultCode,
+                   N'يجب اختيار وحدتين موجودتين ونشطتين.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM dbo.UnitConversions
+            WHERE FromUnitId = @FromUnitId
+              AND ToUnitId = @ToUnitId
+        )
+        BEGIN
+            SELECT -4 AS ResultCode,
+                   N'قاعدة التحويل بين هاتين الوحدتين موجودة مسبقاً.' AS ResultMessage;
+            RETURN;
+        END;
+
+        INSERT INTO dbo.UnitConversions
+            (FromUnitId, ToUnitId, ConversionFactor, Notes)
+        VALUES
+            (@FromUnitId, @ToUnitId, @ConversionFactor,
+             NULLIF(LTRIM(RTRIM(@Notes)), N''));
+
+        SELECT 1 AS ResultCode,
+               N'تمت إضافة قاعدة التحويل بنجاح.' AS ResultMessage,
+               CONVERT(INT, SCOPE_IDENTITY()) AS UnitConversionId;
+    END TRY
+    BEGIN CATCH
+        SELECT -500 AS ResultCode,
+               N'حدث خطأ أثناء إضافة قاعدة التحويل.' AS ResultMessage,
+               ERROR_NUMBER() AS ErrorNumber,
+               ERROR_MESSAGE() AS ErrorMessage;
+    END CATCH
+END
+GO
+/****** Object: StoredProcedure [UnitConversion_Update] ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [UnitConversion_Update]
+    @UnitConversionId INT,
+    @FromUnitId INT,
+    @ToUnitId INT,
+    @ConversionFactor DECIMAL(18,8),
+    @Notes NVARCHAR(500) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.UnitConversions
+            WHERE UnitConversionId = @UnitConversionId
+        )
+        BEGIN
+            SELECT -1 AS ResultCode,
+                   N'قاعدة التحويل غير موجودة.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF @FromUnitId = @ToUnitId
+        BEGIN
+            SELECT -2 AS ResultCode,
+                   N'يجب أن تختلف وحدة المصدر عن وحدة الهدف.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF @ConversionFactor <= 0
+        BEGIN
+            SELECT -3 AS ResultCode,
+                   N'معامل التحويل يجب أن يكون أكبر من صفر.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF (SELECT COUNT(*)
+            FROM dbo.Units
+            WHERE UnitId IN (@FromUnitId, @ToUnitId)) <> 2
+        BEGIN
+            SELECT -4 AS ResultCode,
+                   N'إحدى الوحدتين غير موجودة.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF EXISTS
+        (
+            SELECT 1
+            FROM dbo.UnitConversions
+            WHERE FromUnitId = @FromUnitId
+              AND ToUnitId = @ToUnitId
+              AND UnitConversionId <> @UnitConversionId
+        )
+        BEGIN
+            SELECT -5 AS ResultCode,
+                   N'قاعدة التحويل بين هاتين الوحدتين موجودة مسبقاً.' AS ResultMessage;
+            RETURN;
+        END;
+
+        UPDATE dbo.UnitConversions
+        SET FromUnitId = @FromUnitId,
+            ToUnitId = @ToUnitId,
+            ConversionFactor = @ConversionFactor,
+            Notes = NULLIF(LTRIM(RTRIM(@Notes)), N'')
+        WHERE UnitConversionId = @UnitConversionId;
+
+        SELECT 1 AS ResultCode,
+               N'تم تعديل قاعدة التحويل بنجاح.' AS ResultMessage,
+               @UnitConversionId AS UnitConversionId;
+    END TRY
+    BEGIN CATCH
+        SELECT -500 AS ResultCode,
+               N'حدث خطأ أثناء تعديل قاعدة التحويل.' AS ResultMessage,
+               ERROR_NUMBER() AS ErrorNumber,
+               ERROR_MESSAGE() AS ErrorMessage;
+    END CATCH
+END
+GO
+/****** Object: StoredProcedure [UnitConversion_SetActive] ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [UnitConversion_SetActive]
+    @UnitConversionId INT,
+    @IsActive BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.UnitConversions
+            WHERE UnitConversionId = @UnitConversionId
+        )
+        BEGIN
+            SELECT -1 AS ResultCode,
+                   N'قاعدة التحويل غير موجودة.' AS ResultMessage;
+            RETURN;
+        END;
+
+        IF @IsActive = 1 AND EXISTS
+        (
+            SELECT 1
+            FROM dbo.UnitConversions uc
+            INNER JOIN dbo.Units fromUnit ON fromUnit.UnitId = uc.FromUnitId
+            INNER JOIN dbo.Units toUnit ON toUnit.UnitId = uc.ToUnitId
+            WHERE uc.UnitConversionId = @UnitConversionId
+              AND (fromUnit.IsActive = 0 OR toUnit.IsActive = 0)
+        )
+        BEGIN
+            SELECT -2 AS ResultCode,
+                   N'لا يمكن تفعيل التحويل لأن إحدى الوحدتين غير نشطة.' AS ResultMessage;
+            RETURN;
+        END;
+
+        UPDATE dbo.UnitConversions
+        SET IsActive = @IsActive
+        WHERE UnitConversionId = @UnitConversionId;
+
+        SELECT 1 AS ResultCode,
+               N'تم تحديث حالة قاعدة التحويل.' AS ResultMessage,
+               @UnitConversionId AS UnitConversionId;
+    END TRY
+    BEGIN CATCH
+        SELECT -500 AS ResultCode,
+               N'حدث خطأ أثناء تغيير حالة قاعدة التحويل.' AS ResultMessage,
+               ERROR_NUMBER() AS ErrorNumber,
+               ERROR_MESSAGE() AS ErrorMessage;
+    END CATCH
+END
+GO
 /****** Object:  StoredProcedure [Category_GetAll]    Script Date: 11/10/2026 12:25:16 م ******/
 SET ANSI_NULLS ON
 GO
@@ -1314,6 +1584,36 @@ BEGIN
         p.Depth,
         r.RecipeId;
 END;
+GO
+/****** Object: StoredProcedure [ItemPrice_GetAll] ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [ItemPrice_GetAll]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        ip.ItemPriceId,
+        ip.ItemId,
+        i.ItemCode,
+        i.ItemName,
+        ip.Price,
+        ip.UnitId,
+        u.UnitName,
+        u.Symbol AS UnitSymbol,
+        ip.Currency,
+        ip.EffectiveDate,
+        ip.IsActive,
+        ip.Notes,
+        ip.CreatedAt
+    FROM dbo.ItemPrices ip
+    INNER JOIN dbo.Items i ON i.ItemId = ip.ItemId
+    LEFT JOIN dbo.Units u ON u.UnitId = ip.UnitId
+    ORDER BY i.ItemName, ip.EffectiveDate DESC, ip.CreatedAt DESC;
+END
 GO
 /****** Object:  StoredProcedure [ItemPrice_ActivateDuePrices]    Script Date: 11/10/2026 12:25:16 م ******/
 SET ANSI_NULLS ON

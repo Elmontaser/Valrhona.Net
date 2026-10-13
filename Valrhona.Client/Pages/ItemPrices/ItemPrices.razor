@@ -1,0 +1,433 @@
+@page "/item-prices"
+@using Valrhona.Client.Models.Items
+@using Valrhona.Client.Models.ItemPrices
+@using Valrhona.Client.Models.Lookups
+@using Valrhona.Client.Services.Items
+@using Valrhona.Client.Services.ItemPrices
+@using Valrhona.Client.Services.Lookups
+@inject ItemPriceService ItemPriceService
+@inject ItemService ItemService
+@inject LookupService LookupService
+
+<PageTitle>تسعير الأصناف - Valrhona</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">تسعير الأصناف</h2>
+            <p class="text-muted mb-0">تسجيل أسعار الأصناف وتفعيل الأسعار المستحقة</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-dark" @onclick="AskActivateDuePrices"
+                    disabled="@(isLoading || isSaving)">تفعيل الأسعار المستحقة</button>
+            <button type="button" class="btn btn-dark px-4" @onclick="OpenCreate" disabled="@isLoading">
+                <span class="me-2">＋</span> تسجيل سعر
+            </button>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible shadow-sm">
+            @successMessage
+            <button type="button" class="btn-close" aria-label="إغلاق" @onclick="() => successMessage = null"></button>
+        </div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-dark" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <div class="mt-3 text-muted">جاري تحميل الأصناف...</div>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="alert alert-danger shadow-sm">
+            <strong>حدث خطأ أثناء تحميل الأصناف</strong>
+            <div class="mt-1">@loadError</div>
+            <button type="button" class="btn btn-sm btn-outline-danger mt-2" @onclick="LoadAllAsync">
+                إعادة المحاولة
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-lg-8">
+                        <label class="form-label fw-semibold">بحث عن صنف</label>
+                        <div class="input-group">
+                            <span class="input-group-text">🔍</span>
+                            <input type="text" class="form-control" placeholder="ابحث بالكود أو الاسم..."
+                                   value="@searchText" @oninput="OnSearchInput" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <button type="button" class="btn btn-outline-secondary w-100" @onclick="ResetSearch">
+                            إعادة ضبط
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4">#</th>
+                                <th>كود الصنف</th>
+                                <th>اسم الصنف</th>
+                                <th>وحدة الصنف</th>
+                                <th>السعر الحالي</th>
+                                <th class="text-center">الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (filteredItems.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">لا توجد أصناف مطابقة للبحث.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var item in filteredItems)
+                                {
+                                    <tr>
+                                        <td class="px-4">@item.ItemId</td>
+                                        <td><span class="fw-semibold">@item.ItemCode</span></td>
+                                        <td>@item.ItemName</td>
+                                        <td>@FormatUnit(item.UnitName, item.Symbol)</td>
+                                        <td>@FormatCurrentPrice(item.ItemId)</td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                    disabled="@isSaving" @onclick="() => OpenCreate(item)">
+                                                تسجيل سعر
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <small class="text-muted">عدد الأصناف النشطة: @filteredItems.Count من @items.Count</small>
+            </div>
+        </div>
+
+        @if (recentPrices.Count > 0)
+        {
+            <div class="mt-4">
+                <h5 class="fw-bold mb-3">الأسعار المسجلة خلال هذه الجلسة</h5>
+                <div class="card border-0 shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4">كود الصنف</th>
+                                    <th>الصنف</th>
+                                    <th>السعر</th>
+                                    <th>وحدة السعر</th>
+                                    <th>السريان</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var price in recentPrices)
+                                {
+                                    <tr>
+                                        <td class="px-4">@price.ItemCode</td>
+                                        <td>@price.ItemName</td>
+                                        <td class="fw-semibold">@price.Price.ToString("N4") @price.Currency</td>
+                                        <td>@FormatUnit(price.UnitName, price.UnitSymbol)</td>
+                                        <td>@price.EffectiveDate.ToString("yyyy-MM-dd")</td>
+                                        <td>
+                                            <span class="badge @(price.IsActive ? "text-bg-success" : "text-bg-info")">
+                                                @(price.IsActive ? "ساري" : "قادم")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (activePrices is not null)
+        {
+            <div class="mt-4">
+                <h5 class="fw-bold mb-3">الأسعار السارية بعد التحديث</h5>
+                <div class="card border-0 shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4">كود الصنف</th>
+                                    <th>الصنف</th>
+                                    <th>السعر</th>
+                                    <th>وحدة السعر</th>
+                                    <th>تاريخ السريان</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (activePrices.Count == 0)
+                                {
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">لا توجد أسعار سارية.</td></tr>
+                                }
+                                else
+                                {
+                                    @foreach (var price in activePrices)
+                                    {
+                                        <tr>
+                                            <td class="px-4">@price.ItemCode</td>
+                                            <td>@price.ItemName</td>
+                                            <td class="fw-semibold">@price.Price.ToString("N4") @price.Currency</td>
+                                            <td>@FormatUnit(price.UnitName, price.UnitSymbol)</td>
+                                            <td>@price.EffectiveDate.ToString("yyyy-MM-dd")</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@if (showForm)
+{
+    <ItemPriceFormModal Form="@form" Items="@items" Units="@units" FormError="@formError"
+                        IsSaving="@isSaving" OnValidSubmit="SaveAsync" OnClose="CloseForm" />
+}
+
+@if (showActivateDueConfirm)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="fs-1">⚠️</div>
+                    <p class="mt-2 mb-1">تفعيل الأسعار التي حل تاريخ سريانها؟</p>
+                    <div class="text-muted small">سيُعاد حساب تكاليف الأصناف المرتبطة.</div>
+                    @if (!string.IsNullOrWhiteSpace(operationError))
+                    {
+                        <div class="alert alert-danger py-2 mt-3 mb-0 small">@operationError</div>
+                    }
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CancelActivateDue"
+                            disabled="@isSaving">إلغاء</button>
+                    <button type="button" class="btn btn-dark" @onclick="ActivateDuePricesAsync"
+                            disabled="@isSaving">
+                        @(isSaving ? "جارٍ التحديث..." : "تفعيل الأسعار")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ItemDto> items = new();
+    private List<ItemDto> filteredItems = new();
+    private List<UnitDto> units = new();
+    private Dictionary<int, ItemPriceDto> currentPrices = new();
+    private List<ItemPriceDto> recentPrices = new();
+    private List<ItemPriceDto>? activePrices;
+
+    private bool isLoading = true;
+    private bool isSaving;
+    private bool showForm;
+    private bool showActivateDueConfirm;
+    private string? loadError;
+    private string? formError;
+    private string? operationError;
+    private string? successMessage;
+    private string searchText = string.Empty;
+    private ItemPriceFormModel form = new();
+
+    protected override async Task OnInitializedAsync() => await LoadAllAsync();
+
+    private async Task LoadAllAsync()
+    {
+        try
+        {
+            isLoading = true;
+            loadError = null;
+            var itemsTask = ItemService.GetAllAsync();
+            var unitsTask = LookupService.GetUnitsAsync();
+            var pricesTask = ItemPriceService.GetAllAsync();
+            await Task.WhenAll(itemsTask, unitsTask, pricesTask);
+            items = itemsTask.Result;
+            units = unitsTask.Result;
+            SetCurrentPrices(pricesTask.Result);
+            FilterItems();
+        }
+        catch (Exception ex)
+        {
+            loadError = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void FilterItems()
+    {
+        IEnumerable<ItemDto> result = items.Where(item => item.IsActive);
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var term = searchText.Trim();
+            result = result.Where(item =>
+                item.ItemCode.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                item.ItemName.Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        filteredItems = result.OrderBy(item => item.ItemName).ToList();
+    }
+
+    private void OnSearchInput(ChangeEventArgs args)
+    {
+        searchText = args.Value?.ToString() ?? string.Empty;
+        FilterItems();
+    }
+
+    private void ResetSearch()
+    {
+        searchText = string.Empty;
+        FilterItems();
+    }
+
+    private void OpenCreate() => OpenCreate(null);
+
+    private void OpenCreate(ItemDto? item)
+    {
+        form = new ItemPriceFormModel
+        {
+            ItemId = item?.ItemId ?? 0,
+            UnitId = item?.UnitId ?? 0,
+            EffectiveDate = DateTime.Today
+        };
+        formError = null;
+        showForm = true;
+    }
+
+    private void CloseForm() => showForm = false;
+
+    private async Task SaveAsync()
+    {
+        try
+        {
+            isSaving = true;
+            formError = null;
+            successMessage = null;
+
+            var savedPrice = await ItemPriceService.SetAsync(form);
+            var item = items.FirstOrDefault(candidate => candidate.ItemId == form.ItemId);
+            var unit = units.FirstOrDefault(candidate => candidate.UnitId == form.UnitId);
+            savedPrice.ItemCode = item?.ItemCode;
+            savedPrice.ItemName = item?.ItemName;
+            savedPrice.UnitName = unit?.UnitName;
+            savedPrice.UnitSymbol = unit?.Symbol;
+            recentPrices.Insert(0, savedPrice);
+            await LoadCurrentPricesAsync();
+
+            showForm = false;
+            successMessage = savedPrice.IsActive
+                ? "تم تسجيل السعر وتفعيله."
+                : "تم تسجيل السعر، وسيُفعّل عند حلول تاريخ السريان.";
+        }
+        catch (Exception ex)
+        {
+            formError = ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void AskActivateDuePrices()
+    {
+        operationError = null;
+        showActivateDueConfirm = true;
+    }
+
+    private void CancelActivateDue() => showActivateDueConfirm = false;
+
+    private async Task ActivateDuePricesAsync()
+    {
+        try
+        {
+            isSaving = true;
+            operationError = null;
+            activePrices = await ItemPriceService.ActivateDuePricesAsync(DateTime.Today);
+            await LoadCurrentPricesAsync();
+            foreach (var price in activePrices)
+            {
+                var item = items.FirstOrDefault(candidate => candidate.ItemId == price.ItemId);
+                var unit = units.FirstOrDefault(candidate => candidate.UnitId == price.UnitId);
+                price.ItemCode ??= item?.ItemCode;
+                price.ItemName ??= item?.ItemName;
+                price.UnitName = unit?.UnitName;
+                price.UnitSymbol = unit?.Symbol;
+            }
+
+            showActivateDueConfirm = false;
+            successMessage = "تم تحديث الأسعار المستحقة وإعادة حساب التكاليف.";
+        }
+        catch (Exception ex)
+        {
+            operationError = ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private string FormatUnit(string? unitName, string? symbol) =>
+        string.IsNullOrWhiteSpace(unitName)
+            ? "—"
+            : string.IsNullOrWhiteSpace(symbol)
+                ? unitName
+                : $"{unitName} ({symbol})";
+
+    private async Task LoadCurrentPricesAsync() =>
+        SetCurrentPrices(await ItemPriceService.GetAllAsync());
+
+    private void SetCurrentPrices(IEnumerable<ItemPriceDto> prices)
+    {
+        currentPrices = prices
+            .Where(price => price.IsActive && price.EffectiveDate.Date <= DateTime.Today)
+            .GroupBy(price => price.ItemId)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .OrderByDescending(price => price.EffectiveDate)
+                    .ThenByDescending(price => price.CreatedAt)
+                    .ThenByDescending(price => price.ItemPriceId)
+                    .First());
+    }
+
+    private string FormatCurrentPrice(int itemId) =>
+        currentPrices.TryGetValue(itemId, out var price)
+            ? $"{price.Price:N4} {price.Currency} / {FormatUnit(price.UnitName, price.UnitSymbol)}"
+            : "—";
+}

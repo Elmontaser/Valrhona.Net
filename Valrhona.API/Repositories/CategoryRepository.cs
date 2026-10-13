@@ -15,7 +15,7 @@ public class CategoryRepository(
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Category>(
-            "dbo.Category_GetAll",
+            "Category_GetAll",
             commandType: CommandType.StoredProcedure);
     }
 
@@ -24,7 +24,7 @@ public class CategoryRepository(
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<Category>(
-            "dbo.Category_GetById",
+            "Category_GetById",
             new { CategoryId = categoryId },
             commandType: CommandType.StoredProcedure);
     }
@@ -34,7 +34,7 @@ public class CategoryRepository(
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Category_Insert",
+            "Category_Insert",
             dto);
     }
 
@@ -43,7 +43,7 @@ public class CategoryRepository(
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Category_Update",
+            "Category_Update",
             dto);
     }
 
@@ -52,7 +52,7 @@ public class CategoryRepository(
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Category_Delete",
+            "Category_Delete",
             dto);
     }
 }

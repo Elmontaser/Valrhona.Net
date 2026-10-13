@@ -16,7 +16,7 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Item>(
-            "dbo.Item_GetAll",
+            "Item_GetAll",
             commandType: CommandType.StoredProcedure);
     }
 
@@ -25,7 +25,7 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<Item>(
-            "dbo.Item_GetById",
+            "Item_GetById",
             new
             {
                 ItemId = itemId
@@ -39,7 +39,7 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
 
         // يرمي BusinessRuleException عند الفشل (كود مكرر، فئة غير فعالة...)
         var result = await connection.ExecuteForResultAsync(
-            "dbo.Item_Insert",
+            "Item_Insert",
             dto);
 
         if (result.ItemId is null)
@@ -56,7 +56,7 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Item_Update",
+            "Item_Update",
             dto);
     }
 
@@ -65,7 +65,7 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Item_Activate", dto);
+            "Item_Activate", dto);
     }
 
     public async Task<IEnumerable<Item>> SearchAsync(SearchItemDto dto)
@@ -73,7 +73,7 @@ public class ItemRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Item>(
-            "dbo.Item_Search",
+            "Item_Search",
             dto,
             commandType: CommandType.StoredProcedure);
     }

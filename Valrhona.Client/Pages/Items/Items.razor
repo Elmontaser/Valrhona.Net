@@ -2,8 +2,10 @@
 @using Valrhona.Client.Models.Items
 @using Valrhona.Client.Models.Lookups
 @using Valrhona.Client.Services.Items
+@using Valrhona.Client.Services.ItemPrices
 @using Valrhona.Client.Services.Lookups
 @inject ItemService ItemService
+@inject ItemPriceService ItemPriceService
 @inject LookupService LookupService
 
 <PageTitle>الأصناف - Valrhona</PageTitle>
@@ -114,6 +116,7 @@
                                 <th role="button" @onclick='() => SortBy("type")'>النوع @SortIcon("type")</th>
                                 <th>الفئة</th>
                                 <th>الوحدة</th>
+                                <th>السعر الحالي</th>
                                 <th>الحالة</th>
                                 <th class="text-center">الإجراءات</th>
                             </tr>
@@ -122,7 +125,7 @@
                             @if (pagedItems.Count == 0)
                             {
                                 <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
+                                    <td colspan="9" class="text-center py-5 text-muted">
                                         لا توجد أصناف مطابقة للبحث.
                                     </td>
                                 </tr>
@@ -138,6 +141,7 @@
                                         <td>@GetItemTypeName(item)</td>
                                         <td>@GetCategoryName(item)</td>
                                         <td>@GetUnitName(item)</td>
+                                        <td>@FormatCurrentPrice(item)</td>
                                         <td>
                                             @if (item.IsActive)
                                             {
@@ -286,13 +290,36 @@
             var unitsTask = LookupService.GetUnitsAsync();
             var typesTask = LookupService.GetItemTypesAsync();
             var catsTask = LookupService.GetCategoriesAsync();
+            var pricesTask = ItemPriceService.GetAllAsync();
 
-            await Task.WhenAll(itemsTask, unitsTask, typesTask, catsTask);
+            await Task.WhenAll(itemsTask, unitsTask, typesTask, catsTask, pricesTask);
 
             items = itemsTask.Result;
             units = unitsTask.Result;
             itemTypes = typesTask.Result;
             categories = catsTask.Result;
+
+            var activePrices = pricesTask.Result
+                .Where(price => price.IsActive && price.EffectiveDate.Date <= DateTime.Today)
+                .GroupBy(price => price.ItemId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group
+                        .OrderByDescending(price => price.EffectiveDate)
+                        .ThenByDescending(price => price.CreatedAt)
+                        .ThenByDescending(price => price.ItemPriceId)
+                        .First());
+
+            foreach (var item in items)
+            {
+                if (!activePrices.TryGetValue(item.ItemId, out var price))
+                    continue;
+
+                item.CurrentPrice = price.Price;
+                item.PriceCurrency = price.Currency;
+                item.PriceUnitName = price.UnitName;
+                item.PriceUnitSymbol = price.UnitSymbol;
+            }
 
             Refresh();
         }
@@ -541,4 +568,9 @@
         item.UnitName
         ?? units.FirstOrDefault(x => x.UnitId == item.UnitId)?.UnitName
         ?? $"وحدة {item.UnitId}";
+
+    private static string FormatCurrentPrice(ItemDto item) =>
+        item.CurrentPrice is null
+            ? "—"
+            : $"{item.CurrentPrice.Value:N4} {item.PriceCurrency} / {item.PriceUnitSymbol ?? item.PriceUnitName}";
 }

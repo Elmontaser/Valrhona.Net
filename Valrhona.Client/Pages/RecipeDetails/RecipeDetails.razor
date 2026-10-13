@@ -1,0 +1,509 @@
+@page "/recipe-details"
+@using Valrhona.Client.Models.Items
+@using Valrhona.Client.Models.Lookups
+@using Valrhona.Client.Models.Recipes
+@using Valrhona.Client.Services.Items
+@using Valrhona.Client.Services.Lookups
+@using Valrhona.Client.Services.Recipes
+@inject RecipeService RecipeService
+@inject ItemService ItemService
+@inject LookupService LookupService
+
+<PageTitle>مكونات الوصفات - Valrhona</PageTitle>
+
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">مكونات الوصفات</h2>
+            <p class="text-muted mb-0">إدارة مكونات كل وصفة وكمياتها ووحداتها</p>
+        </div>
+        <button type="button" class="btn btn-dark px-4" @onclick="OpenCreate"
+                disabled="@(isLoading || isDetailsLoading || selectedRecipe is null || !selectedRecipe.IsActive)">
+            <span class="me-2">＋</span> إضافة مكوّن
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible shadow-sm">
+            @successMessage
+            <button type="button" class="btn-close" aria-label="إغلاق" @onclick="() => successMessage = null"></button>
+        </div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-dark" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <div class="mt-3 text-muted">جاري تحميل الوصفات...</div>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <div class="alert alert-danger shadow-sm">
+            <strong>حدث خطأ أثناء تحميل البيانات</strong>
+            <div class="mt-1">@loadError</div>
+            <button type="button" class="btn btn-sm btn-outline-danger mt-2" @onclick="LoadAllAsync">
+                إعادة المحاولة
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-lg-6">
+                        <label class="form-label fw-semibold">الوصفة</label>
+                        <select class="form-select" value="@selectedRecipeId" @onchange="OnRecipeChanged">
+                            <option value="0">اختر الوصفة...</option>
+                            @foreach (var recipe in recipes)
+                            {
+                                <option value="@recipe.RecipeId">
+                                    @recipe.RecipeCode - @recipe.RecipeName@(recipe.IsActive ? "" : " (غير نشطة)")
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-8 col-lg-4">
+                        <label class="form-label fw-semibold">بحث في المكونات</label>
+                        <div class="input-group">
+                            <span class="input-group-text">🔍</span>
+                            <input type="text" class="form-control" placeholder="اسم أو كود المكوّن..."
+                                   value="@searchText" @oninput="OnSearchInput"
+                                   disabled="@(selectedRecipe is null)" />
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <button type="button" class="btn btn-outline-secondary w-100" @onclick="ResetSearch">
+                            إعادة ضبط
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (selectedRecipe is null)
+        {
+            <div class="text-center text-muted py-5">اختر وصفة لعرض مكوناتها.</div>
+        }
+        else
+        {
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">@selectedRecipe.RecipeCode - @selectedRecipe.RecipeName</h5>
+                    <div class="text-muted small">
+                        الناتج: @selectedRecipe.OutputQuantity.ToString("0.####") @selectedRecipe.OutputUnitName
+                        @if (!selectedRecipe.IsActive)
+                        {
+                            <span class="badge text-bg-secondary me-2">وصفة غير نشطة</span>
+                        }
+                    </div>
+                </div>
+                <small class="text-muted">عدد المكونات: @ingredients.Count</small>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(operationError))
+            {
+                <div class="alert alert-danger shadow-sm">@operationError</div>
+            }
+
+            @if (isDetailsLoading)
+            {
+                <div class="text-center text-muted py-5">
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    جاري تحميل المكونات...
+                </div>
+            }
+            else
+            {
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4">الترتيب</th>
+                                        <th>كود المكوّن</th>
+                                        <th>اسم المكوّن</th>
+                                        <th>الكمية</th>
+                                        <th>الوحدة</th>
+                                        <th>الهدر %</th>
+                                        <th>ملاحظات</th>
+                                        <th class="text-center">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (filteredIngredients.Count == 0)
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center py-5 text-muted">
+                                                @(ingredients.Count == 0 ? "لا توجد مكونات لهذه الوصفة." : "لا توجد مكونات مطابقة للبحث.")
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var ingredient in filteredIngredients)
+                                        {
+                                            <tr>
+                                                <td class="px-4">@ingredient.SequenceNo</td>
+                                                <td><span class="fw-semibold">@ingredient.ItemCode</span></td>
+                                                <td>@ingredient.ItemName</td>
+                                                <td>@ingredient.Quantity.ToString("0.####")</td>
+                                                <td>@FormatUnit(ingredient.UnitName, ingredient.Symbol)</td>
+                                                <td>@ingredient.WastePercent.ToString("0.##")%</td>
+                                                <td>@(string.IsNullOrWhiteSpace(ingredient.Notes) ? "—" : ingredient.Notes)</td>
+                                                <td class="text-center text-nowrap">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary me-1" title="تعديل"
+                                                            disabled="@(!selectedRecipe.IsActive || isSaving)"
+                                                            @onclick="() => OpenEdit(ingredient)">✏️</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" title="حذف"
+                                                            disabled="@(!selectedRecipe.IsActive || isSaving || ingredients.Count <= 1)"
+                                                            @onclick="() => AskDelete(ingredient)">🗑</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <small class="text-muted">عرض @filteredIngredients.Count من @ingredients.Count مكوّن</small>
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>
+
+@if (showForm)
+{
+    <RecipeDetailFormModal Form="@form" Items="@items" Units="@units" FormError="@formError"
+                           IsSaving="@isSaving" OnValidSubmit="SaveIngredientAsync" OnClose="CloseForm" />
+}
+
+@if (ingredientPendingDelete is not null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="fs-1">⚠️</div>
+                    <p class="mt-2 mb-1">هل تريد حذف هذا المكوّن من الوصفة؟</p>
+                    <strong>@ingredientPendingDelete.ItemName</strong>
+                    @if (!string.IsNullOrWhiteSpace(deleteError))
+                    {
+                        <div class="alert alert-danger py-2 mt-3 mb-0 small">@deleteError</div>
+                    }
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CancelDelete"
+                            disabled="@isSaving">إلغاء</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDeleteAsync"
+                            disabled="@isSaving">@(isSaving ? "جارٍ الحفظ..." : "حذف")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<RecipeDto> recipes = new();
+    private List<ItemDto> items = new();
+    private List<UnitDto> units = new();
+    private List<RecipeIngredientDto> ingredients = new();
+    private List<RecipeIngredientDto> filteredIngredients = new();
+
+    private RecipeDto? selectedRecipe;
+    private int selectedRecipeId;
+    private bool isLoading = true;
+    private bool isDetailsLoading;
+    private bool isSaving;
+    private bool showForm;
+    private string searchText = string.Empty;
+    private string? loadError;
+    private string? operationError;
+    private string? successMessage;
+    private string? formError;
+    private string? deleteError;
+    private RecipeDetailFormModel form = new();
+    private RecipeIngredientDto? ingredientPendingDelete;
+
+    protected override async Task OnInitializedAsync() => await LoadAllAsync();
+
+    private async Task LoadAllAsync()
+    {
+        try
+        {
+            isLoading = true;
+            loadError = null;
+
+            var recipesTask = RecipeService.GetAllAsync();
+            var itemsTask = ItemService.GetAllAsync();
+            var unitsTask = LookupService.GetUnitsAsync();
+            await Task.WhenAll(recipesTask, itemsTask, unitsTask);
+
+            recipes = recipesTask.Result;
+            items = itemsTask.Result;
+            units = unitsTask.Result;
+
+            if (selectedRecipeId == 0)
+            {
+                selectedRecipeId = recipes.FirstOrDefault(recipe => recipe.IsActive)?.RecipeId
+                    ?? recipes.FirstOrDefault()?.RecipeId
+                    ?? 0;
+            }
+
+            await LoadSelectedRecipeAsync();
+        }
+        catch (Exception ex)
+        {
+            loadError = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadSelectedRecipeAsync()
+    {
+        selectedRecipe = recipes.FirstOrDefault(recipe => recipe.RecipeId == selectedRecipeId);
+        ingredients.Clear();
+        FilterIngredients();
+        operationError = null;
+
+        if (selectedRecipe is null)
+            return;
+
+        try
+        {
+            isDetailsLoading = true;
+            ingredients = await RecipeService.GetIngredientsAsync(selectedRecipeId);
+            FilterIngredients();
+        }
+        catch (Exception ex)
+        {
+            operationError = ex.Message;
+        }
+        finally
+        {
+            isDetailsLoading = false;
+        }
+    }
+
+    private async Task OnRecipeChanged(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out var recipeId))
+            selectedRecipeId = recipeId;
+
+        searchText = string.Empty;
+        await LoadSelectedRecipeAsync();
+    }
+
+    private void OnSearchInput(ChangeEventArgs args)
+    {
+        searchText = args.Value?.ToString() ?? string.Empty;
+        FilterIngredients();
+    }
+
+    private void ResetSearch()
+    {
+        searchText = string.Empty;
+        FilterIngredients();
+    }
+
+    private void FilterIngredients()
+    {
+        IEnumerable<RecipeIngredientDto> result = ingredients.OrderBy(ingredient => ingredient.SequenceNo);
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            var term = searchText.Trim();
+            result = result.Where(ingredient =>
+                ingredient.ItemCode.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                ingredient.ItemName.Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        filteredIngredients = result.ToList();
+    }
+
+    private void OpenCreate()
+    {
+        form = new RecipeDetailFormModel();
+        formError = null;
+        showForm = true;
+    }
+
+    private void OpenEdit(RecipeIngredientDto ingredient)
+    {
+        form = new RecipeDetailFormModel
+        {
+            RecipeDetailId = ingredient.RecipeDetailId,
+            IngredientItemId = ingredient.IngredientItemId,
+            Quantity = ingredient.Quantity,
+            UnitId = ingredient.UnitId,
+            WastePercent = ingredient.WastePercent,
+            Notes = ingredient.Notes,
+            CurrentItemLabel = $"{ingredient.ItemCode} - {ingredient.ItemName}",
+            CurrentUnitLabel = FormatUnit(ingredient.UnitName, ingredient.Symbol)
+        };
+        formError = null;
+        showForm = true;
+    }
+
+    private void CloseForm() => showForm = false;
+
+    private async Task SaveIngredientAsync()
+    {
+        if (selectedRecipe is null)
+            return;
+
+        if (ingredients.Any(ingredient =>
+                ingredient.IngredientItemId == form.IngredientItemId &&
+                ingredient.RecipeDetailId != form.RecipeDetailId))
+        {
+            formError = "لا يمكن تكرار نفس المكوّن في الوصفة.";
+            return;
+        }
+
+        var updatedIngredients = ingredients
+            .OrderBy(ingredient => ingredient.SequenceNo)
+            .Select(ingredient => new RecipeIngredientFormModel
+            {
+                IngredientItemId = ingredient.IngredientItemId,
+                Quantity = ingredient.Quantity,
+                UnitId = ingredient.UnitId,
+                WastePercent = ingredient.WastePercent,
+                Notes = ingredient.Notes
+            })
+            .ToList();
+
+        var formIngredient = new RecipeIngredientFormModel
+        {
+            IngredientItemId = form.IngredientItemId,
+            Quantity = form.Quantity,
+            UnitId = form.UnitId,
+            WastePercent = form.WastePercent,
+            Notes = form.Notes
+        };
+
+        if (form.RecipeDetailId == 0)
+            updatedIngredients.Add(formIngredient);
+        else
+        {
+            var index = ingredients
+                .OrderBy(ingredient => ingredient.SequenceNo)
+                .ToList()
+                .FindIndex(ingredient => ingredient.RecipeDetailId == form.RecipeDetailId);
+
+            if (index < 0)
+            {
+                formError = "المكوّن المحدد لم يعد موجودًا. أعد تحميل الصفحة.";
+                return;
+            }
+
+            updatedIngredients[index] = formIngredient;
+        }
+
+        await SaveIngredientsAsync(updatedIngredients,
+            form.RecipeDetailId == 0 ? "تمت إضافة المكوّن وإعادة حساب التكلفة." : "تم تعديل المكوّن وإعادة حساب التكلفة.");
+    }
+
+    private void AskDelete(RecipeIngredientDto ingredient)
+    {
+        ingredientPendingDelete = ingredient;
+        deleteError = null;
+    }
+
+    private void CancelDelete() => ingredientPendingDelete = null;
+
+    private async Task ConfirmDeleteAsync()
+    {
+        if (selectedRecipe is null || ingredientPendingDelete is null)
+            return;
+
+        var updatedIngredients = ingredients
+            .Where(ingredient => ingredient.RecipeDetailId != ingredientPendingDelete.RecipeDetailId)
+            .OrderBy(ingredient => ingredient.SequenceNo)
+            .Select(ingredient => new RecipeIngredientFormModel
+            {
+                IngredientItemId = ingredient.IngredientItemId,
+                Quantity = ingredient.Quantity,
+                UnitId = ingredient.UnitId,
+                WastePercent = ingredient.WastePercent,
+                Notes = ingredient.Notes
+            })
+            .ToList();
+
+        if (updatedIngredients.Count == 0)
+        {
+            deleteError = "يجب أن تحتوي الوصفة على مكوّن واحد على الأقل.";
+            return;
+        }
+
+        var succeeded = await SaveIngredientsAsync(
+            updatedIngredients,
+            "تم حذف المكوّن وإعادة حساب التكلفة.");
+
+        if (succeeded)
+            ingredientPendingDelete = null;
+        else
+            deleteError = operationError;
+    }
+
+    private async Task<bool> SaveIngredientsAsync(
+        List<RecipeIngredientFormModel> updatedIngredients,
+        string message)
+    {
+        if (selectedRecipe is null)
+            return false;
+
+        try
+        {
+            isSaving = true;
+            formError = null;
+            operationError = null;
+            successMessage = null;
+
+            var recipeForm = new RecipeFormModel
+            {
+                RecipeId = selectedRecipe.RecipeId,
+                RecipeCode = selectedRecipe.RecipeCode,
+                RecipeName = selectedRecipe.RecipeName,
+                OutputItemId = selectedRecipe.OutputItemId,
+                OutputQuantity = selectedRecipe.OutputQuantity,
+                OutputUnitId = selectedRecipe.OutputUnitId,
+                VersionNo = selectedRecipe.VersionNo,
+                Notes = selectedRecipe.Notes,
+                Ingredients = updatedIngredients
+            };
+
+            await RecipeService.UpdateAsync(recipeForm);
+            recipes = await RecipeService.GetAllAsync();
+            selectedRecipe = recipes.FirstOrDefault(recipe => recipe.RecipeId == selectedRecipeId);
+            ingredients = await RecipeService.GetIngredientsAsync(selectedRecipeId);
+            FilterIngredients();
+            showForm = false;
+            successMessage = message;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            operationError = ex.Message;
+            return false;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private static string FormatUnit(string unitName, string? symbol) =>
+        string.IsNullOrWhiteSpace(symbol) ? unitName : $"{unitName} ({symbol})";
+}

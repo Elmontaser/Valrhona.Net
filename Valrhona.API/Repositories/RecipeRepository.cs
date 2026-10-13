@@ -14,7 +14,7 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Recipe>(
-            "dbo.Recipe_GetAll",
+            "Recipe_GetAll",
             commandType: CommandType.StoredProcedure);
     }
 
@@ -23,7 +23,7 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<Recipe>(
-            "dbo.Recipe_GetById",
+            "Recipe_GetById",
             new
             {
                 RecipeId = recipeId
@@ -37,7 +37,7 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Recipe>(
-            "dbo.Recipe_GetByIngredient",
+            "Recipe_GetByIngredient",
             new
             {
                 IngredientItemId = ingredientItemId
@@ -66,10 +66,10 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
         parameters.Add(
             "@Ingredients",
             ingredientsTable.AsTableValuedParameter(
-                "dbo.RecipeIngredientType"));
+                "RecipeIngredientType"));
 
         using var multi = await connection.QueryMultipleAsync(
-    "dbo.Recipe_Save",
+    "Recipe_Save",
     parameters,
     commandType: CommandType.StoredProcedure);
 
@@ -129,10 +129,10 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
         parameters.Add(
             "@Ingredients",
             ingredientsTable.AsTableValuedParameter(
-                "dbo.RecipeIngredientType"));
+                "RecipeIngredientType"));
 
         using var multi = await connection.QueryMultipleAsync(
-            "dbo.Recipe_Save",
+            "Recipe_Save",
             parameters,
             commandType: CommandType.StoredProcedure);
 
@@ -174,7 +174,7 @@ public class RecipeRepository(SqlConnectionFactory connectionFactory) : IRecipeR
         using var connection = connectionFactory.CreateConnection();
 
         var result = await connection.QuerySingleAsync(
-            "dbo.Recipe_Deactivate",
+            "Recipe_Deactivate",
             new
             {
                 RecipeId = recipeId

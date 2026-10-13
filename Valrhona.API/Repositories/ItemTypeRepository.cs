@@ -14,7 +14,7 @@ public class ItemTypeRepository(SqlConnectionFactory connectionFactory) : IItemT
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<ItemType>(
-            "dbo.ItemType_GetAll",
+            "ItemType_GetAll",
             commandType: CommandType.StoredProcedure);
     }
 
@@ -23,7 +23,7 @@ public class ItemTypeRepository(SqlConnectionFactory connectionFactory) : IItemT
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<ItemType>(
-            "dbo.ItemType_GetById",
+            "ItemType_GetById",
             new
             {
                 ItemTypeId = itemTypeId
@@ -36,7 +36,7 @@ public class ItemTypeRepository(SqlConnectionFactory connectionFactory) : IItemT
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<ItemType>(
-            "dbo.ItemType_Insert",
+            "ItemType_Insert",
              new
              {
                  dto.TypeName
@@ -49,7 +49,7 @@ public class ItemTypeRepository(SqlConnectionFactory connectionFactory) : IItemT
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteAsync(
-            "dbo.ItemType_Update",
+            "ItemType_Update",
             dto,
             commandType: CommandType.StoredProcedure);
     }
@@ -59,7 +59,7 @@ public class ItemTypeRepository(SqlConnectionFactory connectionFactory) : IItemT
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteAsync(
-            "dbo.ItemType_Delete",
+            "ItemType_Delete",
             new
             {
                 dto.ItemTypeId

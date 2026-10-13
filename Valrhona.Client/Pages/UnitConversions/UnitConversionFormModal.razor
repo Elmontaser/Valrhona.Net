@@ -1,0 +1,97 @@
+@using Valrhona.Client.Models.Lookups
+@using Valrhona.Client.Models.UnitConversions
+
+<div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.5)">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <EditForm Model="Form" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="modal-header">
+                    <h5 class="modal-title">@(Form.UnitConversionId == 0 ? "إضافة تحويل" : "تعديل تحويل")</h5>
+                    <button type="button" class="btn-close" aria-label="إغلاق" @onclick="OnClose"></button>
+                </div>
+
+                <div class="modal-body">
+                    @if (!string.IsNullOrWhiteSpace(FormError))
+                    {
+                        <div class="alert alert-danger py-2">@FormError</div>
+                    }
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">من وحدة</label>
+                            <InputSelect class="form-select" @bind-Value="Form.FromUnitId">
+                                <option value="0">اختر وحدة المصدر...</option>
+                                @foreach (var unit in Units.Where(unit => unit.IsActive))
+                                {
+                                    <option value="@unit.UnitId">@UnitLabel(unit)</option>
+                                }
+                                @if (Form.FromUnitId > 0 && !Units.Any(unit => unit.UnitId == Form.FromUnitId))
+                                {
+                                    <option value="@Form.FromUnitId">@Form.FromUnitName (غير نشطة)</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => Form.FromUnitId" class="text-danger small" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">إلى وحدة</label>
+                            <InputSelect class="form-select" @bind-Value="Form.ToUnitId">
+                                <option value="0">اختر وحدة الهدف...</option>
+                                @foreach (var unit in Units.Where(unit => unit.IsActive))
+                                {
+                                    <option value="@unit.UnitId">@UnitLabel(unit)</option>
+                                }
+                                @if (Form.ToUnitId > 0 && !Units.Any(unit => unit.UnitId == Form.ToUnitId))
+                                {
+                                    <option value="@Form.ToUnitId">@Form.ToUnitName (غير نشطة)</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="() => Form.ToUnitId" class="text-danger small" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">معامل التحويل</label>
+                        <InputNumber class="form-control" @bind-Value="Form.ConversionFactor"
+                                     min="0.00000001" step="0.00000001" />
+                        <ValidationMessage For="() => Form.ConversionFactor" class="text-danger small" />
+                    </div>
+
+                    <div>
+                        <label class="form-label fw-semibold">ملاحظات</label>
+                        <InputTextArea class="form-control" rows="2" @bind-Value="Form.Notes" />
+                        <ValidationMessage For="() => Form.Notes" class="text-danger small" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="OnClose"
+                            disabled="@IsSaving">إلغاء</button>
+                    <button type="submit" class="btn btn-dark" disabled="@IsSaving">
+                        @if (IsSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        حفظ
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public UnitConversionFormModel Form { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<UnitDto> Units { get; set; } = default!;
+    [Parameter] public string? FormError { get; set; }
+    [Parameter] public bool IsSaving { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private static string UnitLabel(UnitDto unit) =>
+        string.IsNullOrWhiteSpace(unit.Symbol)
+            ? unit.UnitName
+            : $"{unit.UnitName} ({unit.Symbol})";
+}

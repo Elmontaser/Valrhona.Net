@@ -15,7 +15,7 @@ public class UnitRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Unit>(
-            "dbo.Unit_GetAll",
+            "Unit_GetAll",
             commandType: CommandType.StoredProcedure);
     }
 
@@ -24,7 +24,7 @@ public class UnitRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<Unit>(
-            "dbo.Unit_GetById",
+            "Unit_GetById",
             new
             {
                 UnitId = unitId
@@ -38,7 +38,7 @@ public class UnitRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<Unit>(
-            "dbo.Unit_Insert",
+            "Unit_Insert",
             dto,
             commandType: CommandType.StoredProcedure);
     }
@@ -48,7 +48,7 @@ public class UnitRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Unit_Update",
+            "Unit_Update",
             dto);
     }
 
@@ -57,7 +57,7 @@ public class UnitRepository(SqlConnectionFactory connectionFactory)
         using var connection = connectionFactory.CreateConnection();
 
         await connection.ExecuteForResultAsync(
-            "dbo.Unit_Delete",
+            "Unit_Delete",
             dto);
     }
 }

@@ -29,4 +29,9 @@ public class ItemDto
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public decimal? CurrentPrice { get; set; }
+    public string? PriceCurrency { get; set; }
+    public string? PriceUnitName { get; set; }
+    public string? PriceUnitSymbol { get; set; }
 }

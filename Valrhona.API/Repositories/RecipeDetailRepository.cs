@@ -14,7 +14,7 @@ public class RecipeDetailRepository(
     {
         using var connection = connectionFactory.CreateConnection();
 
-        return await connection.QueryAsync<RecipeDetail>("dbo.RecipeDetail_GetByRecipeId",
+        return await connection.QueryAsync<RecipeDetail>("RecipeDetail_GetByRecipeId",
             new
             {
                 RecipeId = recipeId
@@ -27,7 +27,7 @@ public class RecipeDetailRepository(
         using var connection = connectionFactory.CreateConnection();
 
         var result = await connection.QuerySingleOrDefaultAsync<long>(
-            "dbo.RecipeDetail_Insert", dto, commandType: CommandType.StoredProcedure);
+            "RecipeDetail_Insert", dto, commandType: CommandType.StoredProcedure);
 
         return result;
     }
@@ -37,7 +37,7 @@ public class RecipeDetailRepository(
         using var connection = connectionFactory.CreateConnection();
 
         var result = await connection.QuerySingleAsync(
-            "dbo.RecipeDetail_Update", dto, commandType: CommandType.StoredProcedure);
+            "RecipeDetail_Update", dto, commandType: CommandType.StoredProcedure);
 
         int resultCode = result.ResultCode;
 
@@ -54,7 +54,7 @@ public class RecipeDetailRepository(
         using var connection = connectionFactory.CreateConnection();
 
         var result = await connection.QuerySingleAsync(
-            "dbo.RecipeDetail_Delete",
+            "RecipeDetail_Delete",
             new
             {
                 RecipeDetailId = recipeDetailId

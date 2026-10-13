@@ -11,11 +11,20 @@ public class ItemPriceRepository(
     SqlConnectionFactory connectionFactory)
     : IItemPriceRepository
 {
+    public async Task<IEnumerable<ItemPrice>> GetAllAsync()
+    {
+        using var connection = connectionFactory.CreateConnection();
+
+        return await connection.QueryAsync<ItemPrice>(
+            "ItemPrice_GetAll",
+            commandType: CommandType.StoredProcedure);
+    }
+
     public async Task<ItemPrice?> SetAsync(SetItemPriceDto dto)
     {
         using var connection = connectionFactory.CreateConnection();
 
-        using var multi = await connection.QueryMultipleAsync("dbo.ItemPrice_Set", dto, commandType: CommandType.StoredProcedure);
+        using var multi = await connection.QueryMultipleAsync("ItemPrice_Set", dto, commandType: CommandType.StoredProcedure);
 
         ItemPrice? result = null;
 
@@ -42,6 +51,6 @@ public class ItemPriceRepository(
     {
         using var connection = connectionFactory.CreateConnection();
 
-        return await connection.QueryAsync<ItemPrice>("dbo.ItemPrice_ActivateDuePrices", dto, commandType: CommandType.StoredProcedure);
+        return await connection.QueryAsync<ItemPrice>("ItemPrice_ActivateDuePrices", dto, commandType: CommandType.StoredProcedure);
     }
 }
